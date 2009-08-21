@@ -1,0 +1,22 @@
+2009-08-21  Anton Kovalenko  <anton@sw4me.com>
+
+	* tktray.c: applied patch from Sergey Golovan (thanks):
+	image lookup by name is now dynamic (where it's needed).
+
+	* pkgIndex.tcl.in: applied patch from Sergey Golovan:
+	don't register package when runtime Tcl version is lower
+	than build-time version.
+
+	* tclconfig: replaced with the latest TEA files.
+
+	* Makefile.in: minor modifications for newer autoconf
+	* configure: regenerated
+
+2005-01-06  Anton Kovalenko <anton@sw4me.com>
+	* tktray.c (TrayIconObjectCmd): added "bbox" command,
+	because [winfo root*] happens to be unreliable in case of
+	embedded windows.
+
+2005-12-12  Anton Kovalenko <anton@sw4me.com>
+	Initial release.
+	Tested with trayer 1.0, gnome-panel 2.10.2.

@@ -1,0 +1,89 @@
+'\"
+'\" Generated from file 'doc/tktray.man' by tcllib/doctools with format 'nroff'
+'\" Copyright (c) 2005, Anton Kovalenko
+'\"
+.so man.macros
+.TH "tktray" n 1.0 tktray "tktray"
+.BS
+.SH "NAME"
+tktray \- System Tray Icon Support for Tk on X11
+.SH "SYNOPSIS"
+package require \fBTcl  8.4\fR
+.sp
+package require \fBtktray  ?1.0?\fR
+.sp
+\fBtktray::icon\fR \fIpathName\fR ?\fIoptions\fR?\fR
+.sp
+\fIpathName\fR \fBconfigure\fR ?\fIoptions\fR?\fR
+.sp
+\fIpathName\fR \fBbbox\fR\fR
+.sp
+.BE
+.SH "DESCRIPTION"
+.PP
+Tktray is an extension that is able to create system tray icons.
+It follows \fIhttp://www.freedesktop.org\fR
+specifications when looking up the system tray
+manager. This protocol is supported by modern versions
+of KDE and Gnome panels, and by some other panel-like application.
+.SH "COMMANDS"
+.TP
+\fBtktray::icon\fR \fIpathName\fR ?\fIoptions\fR?\fR
+Create a new icon for the system tray.
+The application managing the system tray is notified about the new icon.
+It normally results in the icon being added to the tray.
+If there is no system tray at the icon creation time,
+the icon will be invisible. When a new system tray appears, the icon will
+be added to it.
+.RS
+.TP
+\fB-class\fR
+WM_CLASS attribute for the icon window. Tray manager may use class name
+to remember icon position or other attributes.
+.TP
+\fB-image\fR
+image to show in the system tray. The value must be the name of a photo image.
+Transparency data of the photo are used to set the window's shape.
+The icon will be automatically redrawn or resized
+appropriately on any image modifications.
+.TP
+\fB-visible\fR
+boolean value indicating whether the icon must be visible.
+The system tray manager continues to manage the icon whether it is
+visible or not. Thus  when invisible icon becomes visible, its position
+on the system tray is likely to remain the same.
+.RE
+.TP
+\fIpathName\fR \fBconfigure\fR ?\fIoptions\fR?\fR
+Modify icon's options after it was created.
+.TP
+\fIpathName\fR \fBbbox\fR\fR
+Get the list of left, top, right and bottom coordinates of the icon
+relative to the root window of the icon's screen.
+This command should be used in preference to \fBwinfo rootx\fR and
+\fBwinfo rooty\fR to get icon location.
+No X11 events are delivered to the application when an
+ancestor window of an icon is resized or moved;
+thus Tk may have incorrect information about root coordinates of the window.
+.SH "WINDOW MANAGEMENT"
+An icon behaves like a toplevel window with respect to the
+Tk \fBwm\fR and \fBwinfo\fR commands. To get up-to-date information
+about the icon's screen coordinates, use \fBbbox\fR subcommand rather than
+\fBwinfo rootx\fR and \fBwinfo rooty\fR.
+When \fI-image\fR option is used, the window minimal size and shape
+are set using the dimensions and transparency information of the photo
+image. \fBwm minsize\fR command may be used to set the minimal icon size
+when no image is given. Panel applications obey this setting usually.
+Like any toplevel window, the icon may contain widgets.
+It's not recommended to build complex GUIs in the system tray. Also note
+that the correct handling of the keyboard input is unlikely to be possible.
+.SH "AUTHORS"
+Anton Kovalenko
+See \fIhttp://www.sw4me.com/wiki/Tktray\fR.
+.PP
+.SH "KEYWORDS"
+icons, system tray, taskbar
+.SH "COPYRIGHT"
+.nf
+Copyright (c) 2005, Anton Kovalenko
+.fi
