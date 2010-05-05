@@ -23,21 +23,39 @@ Create a new icon for the system tray.
 The application managing the system tray is notified about the new icon.
 It normally results in the icon being added to the tray.
 
-If there is no system tray at the icon creation time,
-the icon will be invisible. When a new system tray appears, the icon will 
-be added to it.
+If there is no system tray at the icon creation time, the icon will be
+invisible. When a new system tray appears, the icon will be added to
+it. Since tktray 1.3, when the tray crashes and destroys your icon, it
+will be recreated on a new system tray when it's available.
 
 [list_begin opt]
 [opt_def "-class"]
    WM_CLASS attribute for the icon window. Tray manager may use class name
-   to remember icon position or other attributes. 
+   to remember icon position or other attributes. This name may also be used 
+   for event binding. 
 
 [opt_def "-image"]
-   image to show in the system tray. The value must be the name of a photo image.
-   Transparency data of the photo are used to set the window's shape.
+   image to show in the system tray. Since tktray 1.3, image type "photo"
+   is not mandatory anymore.
 
    The icon will be automatically redrawn or resized 
    appropriately on any image modifications.
+
+[opt_def "-shape"] 
+   Boolean flag, defaulting to false, indicating if
+   transparency data of the photo should be used to set 
+   the window's shape.
+
+   An icon will usually look fine when this flag is off
+   and ugly when it's on. Mouse events from transparent
+   areas (alpha=0) are not delivered to your icon in this mode.
+   
+   Allever there is a situation when -shape 1 is better.  If your
+   system tray is all sooo beautiful, with gradients and transparency
+   and bells and whistles, BUT your icons are simple, with alpha
+   channel that is either 0.0 or 1.0 at any point, and they are
+   composed from rectangular pieces: -shape 1 may look less ugly
+   and less inconvenient in these conditions.
 
 [opt_def "-visible"]
    boolean value indicating whether the icon must be visible. 
@@ -56,28 +74,49 @@ be added to it.
    Get the list of left, top, right and bottom coordinates of the icon
    relative to the root window of the icon's screen.
 
-   This command should be used in preference to [cmd "winfo rootx"] and 
-   [cmd "winfo rooty"] to get icon location.
-   No X11 events are delivered to the application when an
-   ancestor window of an icon is resized or moved;
-   thus Tk may have incorrect information about root coordinates of the window.
+   This command should be used in preference to [cmd "winfo rootx"]
+   and [cmd "winfo rooty"] to get icon location, though the latter may
+   seem to work on your system.
+
+   Bounding box information is updated asynchronously. Don't rely on
+   its correctness on script startup, just after icon creation.  
+   This command is for event handlers:  on <ButtonPress-3>
+   you'd like to have a popup menu, but where it should be posted?
+   Use %W bbox to determine it right at the moment when a click happened.
+
 
 [list_end]
 
 [section "WINDOW MANAGEMENT"]
-   An icon behaves like a toplevel window with respect to the 
-   Tk [cmd wm] and [cmd winfo] commands. To get up-to-date information
-   about the icon's screen coordinates, use [cmd bbox] subcommand rather than 
-   [cmd "winfo rootx"] and [cmd "winfo rooty"].
 
-   When [arg -image] option is used, the window minimal size and shape
-   are set using the dimensions and transparency information of the photo 
-   image. [cmd "wm minsize"] command may be used to set the minimal icon size
-   when no image is given. Panel applications obey this setting usually.
+   Current implementation of tktray is designed to present an
+   interface of a usual toplevel window, but there are some important
+   differences (some of them may come up later). System Tray
+   specification is based on XEMBED protocol, and the later has a
+   problem: when the embedder crashes, nothing can prevent embedded
+   windows from destruction.
 
-   Like any toplevel window, the icon may contain widgets. 
-   It's not recommended to build complex GUIs in the system tray. Also note
-   that the correct handling of the keyboard input is unlikely to be possible.
+   Since tktray 1.3, no explicit icon recreation code is required on
+   Tcl level. The widget was split in two: one represented by a
+   caller-specified name, and another (currently $path.inner) that
+   exists only when a tray is available (and dies and comes back and
+   so on).
+
+   This solution has some disadvantages as well.  User-created widget
+   is not mapped at all, thus it can't be used any more as a parent
+   for other widgets, showing them instead of an image. A temporal
+   inner window, however, may contain widgets.
+
+   This version introduces two virtual events, <<IconConfigure>> and
+   <<IconDestroy>>. The first is generated when an icon (the inner
+   window) appears on screen, and when it's moved, resized or changed
+   in some other way.  The second is generated when the inner window
+   is destroyed (you may bind to $icon.inner <Destroy> as well).
+
+   It's not recommended to build complex GUIs in the system tray. Also
+   note that the correct handling of the keyboard input is unlikely to
+   become possible. Events aren't 
+
 
 [section AUTHORS]
 Anton Kovalenko
