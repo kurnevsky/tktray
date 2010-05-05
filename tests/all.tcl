@@ -49,7 +49,7 @@ if 1 {
     bind . <F2> {.myi configure -visible 0}
     bind . <F3> {.myi configure -visible 1}
     bind . <F4> { .myi balloon "Hello, World! Howdy?" }
-    bind .myi <3> {after 2000 {puts "2 secs elapsed, let's talk...";.myi balloon "Hello, World! Howdy?" } }
+    bind .myi <3> {after 2000 {puts "2 secs elapsed, let's talk...";.myi balloon "Натурально, Бендер, вы не понимаете...\nМолчите! моя специальность - гусь!" } }
     bind .myi <2> { .myi configure -visible 0; after 5000 {.myi configure -visible 1}}
     bind .myi <Shift-2> { .myi configure -image ""; after 5000 {.myi configure -image ico1}}
     after 4000 {.myi balloon "Hello, World! Howdy?" }
