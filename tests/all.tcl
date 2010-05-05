@@ -18,14 +18,15 @@ if {[catch {
     set count 2
 }
 
-
+if {$count==4} {
 set rrc 0
 proc regrad {} {
     global rrc
     after 300 regrad
     ico4 copy ico3 -compositingrule [if {[set rrc [expr {($rrc+1)%10}]]} {lindex overlay} {lindex set}]
 }
-catch { package req Tcl 8.5 ; regrad }
+regrad
+}
 set idx 1
 if 1 {
     ::tktray::icon .myi -image ico2 
