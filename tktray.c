@@ -214,6 +214,7 @@ static void Dock(DockIcon *icon, Window manager)
     Tk_GeometryRequest(icon->drawingWin,w,h);
     Tk_SetGrid(icon->drawingWin,1,1,w,h);
     Tk_SetWindowBackgroundPixmap(wrapper, ParentRelative);
+    Tk_MoveToplevelWindow(icon->drawingWin,0,0);
     icon->wrapper = TKU_XID(wrapper);
 
     XChangeProperty(Tk_Display(tkwin), 
@@ -362,14 +363,14 @@ static void RetargetEvent(DockIcon *icon, XEvent *ev)
 static void TrayIconEvent(ClientData cd, XEvent* ev)
 {
     DockIcon *icon = (DockIcon*)cd;
-    int nx,ny,nw,nh;
-    Window bogus;
+    int nx,ny;
 
     switch (ev->type) {
     case Expose:
 	if (!ev->xexpose.count)
 	    EventuallyRedrawIcon(icon);
 	break;
+
     case DestroyNotify:
 	/* If anonymous window is destroyed first, then either
 	   something went wrong with a tray (if -visible) or we just
@@ -389,8 +390,9 @@ static void TrayIconEvent(ClientData cd, XEvent* ev)
 	icon->height = ev->xconfigure.height;
 	TKU_XID(TKU_Wrapper(icon->drawingWin));
 	TKU_XID(TKU_Wrapper(icon->tkwin));
+
 	Tk_GetRootCoords(icon->drawingWin,&nx,&ny);
-	Tk_GeometryRequest(icon->tkwin,icon->width,icon->height);
+	
 	Tk_MoveToplevelWindow(icon->tkwin,nx,ny);
 	icon->x = nx;
 	icon->y = ny;

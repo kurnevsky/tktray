@@ -25,7 +25,7 @@ proc regrad {} {
     after 300 regrad
     ico4 copy ico3 -compositingrule [if {[set rrc [expr {($rrc+1)%10}]]} {lindex overlay} {lindex set}]
 }
-regrad
+catch { package req Tcl 8.5 ; regrad }
 set idx 1
 if 1 {
     ::tktray::icon .myi -image ico2 
