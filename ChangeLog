@@ -1,3 +1,15 @@
+2010-05-06  Anton Kovalenko  <anton@sw4me.com>
+
+	* Makefile.in, configure.in, tclconfig/*: TEA update
+	* configure: regen
+	* doc/tktray.man: documented new features
+	* tktray.c: implemented old-style pseudo-transparency; split
+	widget into a persistent front-end & temporal helper window;
+	borrowed bbox algorithm from xwininfo, seems to work everywhere;
+	threw away a lot of image/photo handling code, using a simple,
+	standard Tk_GetImage in all places except where XShapeCombineMask
+	is used (current version works well without XShapeCombineMask).
+
 2009-08-21  Anton Kovalenko  <anton@sw4me.com>
 
 	* tktray.c: applied patch from Sergey Golovan (thanks):
