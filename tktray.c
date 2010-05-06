@@ -383,6 +383,7 @@ static void TrayIconEvent(ClientData cd, XEvent* ev)
 	icon->flags &= ~ICON_FLAG_REDRAW_PENDING;
 	icon->drawingWin = NULL;
 	icon->wrapper = None;
+	icon->visible = 0;
 	TrayIconUpdate(icon,ICON_CONF_XEMBED); /* find other dock or wait */
 	break;
     case ConfigureNotify:
@@ -422,8 +423,10 @@ static void UserIconEvent(ClientData cd, XEvent* ev)
 	    icon->flags &= ~ICON_FLAG_REDRAW_PENDING;
 	    Tk_DestroyWindow(icon->drawingWin);
 	}
-	if(icon->image) 
+	if(icon->image) {
 	    Tk_FreeImage(icon->image);
+	    icon->image = NULL;
+	}
 	if(icon->widgetCmd)
 	    Tcl_DeleteCommandFromToken(icon->interp,icon->widgetCmd);
 	Tk_FreeConfigOptions((char*)icon, icon->options, icon->tkwin);
