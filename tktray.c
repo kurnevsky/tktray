@@ -315,10 +315,16 @@ static void DisplayIcon(ClientData cd)
 	XClearWindow(Tk_Display(icon->drawingWin),
 		     TKU_XID(icon->drawingWin));
 	if (icon->image) {
-	    Tk_RedrawImage(icon->image,0,0,w,h,
+	    int imgx, imgy, outx, outy, outw, outh;
+	    imgx = (icon->width >= w) ? 0 : -(icon->width - w)/2;
+	    imgy = (icon->height >= h) ? 0 : -(icon->height - h)/2;
+	    outx = (icon->width >= w) ? (icon->width - w)/2 : 0;
+	    outy = (icon->height >= h) ? (icon->height - h)/2 : 0;
+	    outw = (icon->width >= w) ? w : icon->width;
+	    outh = (icon->height >= h) ? h : icon->width;
+	    Tk_RedrawImage(icon->image,imgx,imgy,outw,outh,
 			   TKU_XID(icon->drawingWin),
-			   (icon->width - w)/2,
-			   (icon->height - h)/2);
+			   outx, outy);
 	}
     }
 }
