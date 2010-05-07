@@ -41,21 +41,8 @@ will be recreated on a new system tray when it's available.
    The icon will be automatically redrawn or resized 
    appropriately on any image modifications.
 
-[opt_def "-shape"] 
-   Boolean flag, defaulting to false, indicating if
-   transparency data of the photo should be used to set 
-   the window's shape.
-
-   An icon will usually look fine when this flag is off
-   and ugly when it's on. Mouse events from transparent
-   areas (alpha=0) are not delivered to your icon in this mode.
-   
-   Allever there is a situation when -shape 1 is better.  If your
-   system tray is all sooo beautiful, with gradients and transparency
-   and bells and whistles, BUT your icons are simple, with alpha
-   channel that is either 0.0 or 1.0 at any point, and they are
-   composed from rectangular pieces: -shape 1 may look less ugly
-   and less inconvenient in these conditions.
+[opt_def "-shape"] used to put a nonrectangular shape on an icon
+   window. Ignored for compatibility.
 
 [opt_def "-visible"]
    boolean value indicating whether the icon must be visible. 
