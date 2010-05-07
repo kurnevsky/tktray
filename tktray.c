@@ -100,6 +100,8 @@ static int IconGenericHandler(ClientData cd, XEvent *ev);
 
 static int PostBalloon(DockIcon* icon, const char * utf8msg,
 		       long timeout);
+static void CancelBalloon(DockIcon* icon, int msgid);
+
 static int TrayIconCreateCmd(ClientData cd, Tcl_Interp *interp,
 			     int objc, Tcl_Obj * CONST objv[]);
 static int TrayIconObjectCmd(ClientData cd, Tcl_Interp *interp,
@@ -137,9 +139,10 @@ static int TrayIconObjectCmd(ClientData cd, Tcl_Interp *interp,
     int i;
     XWindowAttributes xwa;
     Window bogus;
+    int msgid;
 
-    enum {XWC_CONFIGURE=0, XWC_CGET, XWC_BALLOON, XWC_BBOX};
-    const char *st_wcmd[]={"configure","cget","balloon","bbox",NULL};
+    enum {XWC_CONFIGURE=0, XWC_CGET, XWC_BALLOON, XWC_CANCEL, XWC_BBOX};
+    const char *st_wcmd[]={"configure","cget","balloon","cancel","bbox",NULL};
     long timeout = 0;
     Tcl_Obj* optionValue;
 
@@ -170,7 +173,6 @@ static int TrayIconObjectCmd(ClientData cd, Tcl_Interp *interp,
 	}
 
     case XWC_BALLOON:
-	/* FIXME: not implemented yet */
 	if ((objc!=3) && (objc!=4)) {
 	    Tcl_WrongNumArgs(interp, 2, objv, "message ?timeout?");
 	    return TCL_ERROR;
@@ -179,8 +181,22 @@ static int TrayIconObjectCmd(ClientData cd, Tcl_Interp *interp,
 	    if (Tcl_GetLongFromObj(interp,objv[3],&timeout)!=TCL_OK)
 		return TCL_ERROR;
 	}
-	PostBalloon(icon,Tcl_GetString(objv[2]), timeout);
+	msgid = PostBalloon(icon,Tcl_GetString(objv[2]), timeout);
+	Tcl_SetObjResult(interp,Tcl_NewIntObj(msgid));
 	return TCL_OK;
+
+    case XWC_CANCEL:
+	if (objc!=3) {
+	    Tcl_WrongNumArgs(interp, 2, objv, "messageId");
+	    return TCL_ERROR;
+	}
+	if (Tcl_GetIntFromObj(interp,objv[1],&msgid)!=TCL_OK) {
+	    return TCL_ERROR;
+	}
+	if (msgid)
+	    CancelBalloon(icon,msgid);
+	return TCL_OK;
+
     case XWC_BBOX:
 	if (icon->drawingWin) {
 	    XGetWindowAttributes(Tk_Display(icon->drawingWin),
@@ -499,6 +515,9 @@ static int PostBalloon(DockIcon* icon, const char * utf8msg,
 
     if (!(icon->drawingWin))
 	return 0;
+    /* overflow protection */
+    if (icon->msgid < 0) 
+	icon->msgid = 0;
 
     memset(&ev, 0, sizeof(ev));
     ev.type = ClientMessage;
@@ -518,23 +537,48 @@ static int PostBalloon(DockIcon* icon, const char * utf8msg,
     XSync(dpy, False);
 
     /* Sending message elements */
-    ev.xclient.message_type =
-	Tk_InternAtom(tkwin,"_NET_SYSTEM_TRAY_MESSAGE_DATA");
+    ev.xclient.message_type = icon->a_NET_SYSTEM_TRAY_MESSAGE_DATA;
     ev.xclient.format = 8;
     while (length>0) {
 	ev.type = ClientMessage;
 	ev.xclient.window = icon->wrapper;
-	ev.xclient.message_type =
-	    Tk_InternAtom(tkwin,"_NET_SYSTEM_TRAY_MESSAGE_DATA");
+	ev.xclient.message_type = icon->a_NET_SYSTEM_TRAY_MESSAGE_DATA;
 	ev.xclient.format = 8;
 	memset(ev.xclient.data.b,0,20);
 	strncpy(ev.xclient.data.b,utf8msg,20);
-	XSendEvent(dpy, icon->manager, True, StructureNotifyMask, &ev);
+	XSendEvent(dpy, icon->manager, True, NoEventMask, &ev);
 	XSync(dpy,False);
 	utf8msg+=20;
 	length-=20;
     }
     return icon->msgid;
+}
+
+static void CancelBalloon(DockIcon* icon, int msgid)
+{
+    Tk_Window tkwin = icon -> tkwin;
+    Display* dpy = Tk_Display(tkwin);
+    XEvent ev;
+
+    if (!(icon->drawingWin))
+	return;
+    /* overflow protection */
+    if (icon->msgid < 0) 
+	icon->msgid = 0;
+
+    memset(&ev, 0, sizeof(ev));
+    ev.type = ClientMessage;
+
+    ev.xclient.window = icon->wrapper;
+
+    ev.xclient.message_type =
+	icon->a_NET_SYSTEM_TRAY_OPCODE;
+    ev.xclient.format = 32;
+    ev.xclient.data.l[0]=CurrentTime;
+    ev.xclient.data.l[1]=SYSTEM_TRAY_CANCEL_MESSAGE;
+    ev.xclient.data.l[2]=msgid;
+
+    XSendEvent(dpy, icon->manager , True, NoEventMask, &ev);
 }
 
 /* For non-tk events */
@@ -721,6 +765,7 @@ static int TrayIconCreateCmd(ClientData cd, Tcl_Interp *interp,
 
     icon->a_NET_SYSTEM_TRAY_Sn = DockSelectionAtomFor(icon->tkwin);
     icon->a_NET_SYSTEM_TRAY_OPCODE = Tk_InternAtom(icon->tkwin,"_NET_SYSTEM_TRAY_OPCODE");
+    icon->a_NET_SYSTEM_TRAY_MESSAGE_DATA = Tk_InternAtom(icon->tkwin,"_NET_SYSTEM_TRAY_MESSAGE_DATA");
     icon->a_XEMBED_INFO = Tk_InternAtom(icon->tkwin,"_XEMBED_INFO");
     icon->aMANAGER = Tk_InternAtom(icon->tkwin,"MANAGER");
     icon->interp = interp;
