@@ -76,7 +76,6 @@ typedef struct {
     Tcl_Command widgetCmd;
 
     Tk_Image image; /* image to be drawn */
-    Tk_PhotoHandle photo;	/* when it's really a photo */
 
     Atom aMANAGER;
     Atom a_NET_SYSTEM_TRAY_Sn;
