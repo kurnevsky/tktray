@@ -43,7 +43,7 @@ int TKU_AddInput( Display* dpy, Window win, long add_to_mask)
 static Tk_Window TKU_Wrapper(Tk_Window w)
 {
     Tk_Window wrapper = (Tk_Window)TkpGetWrapperWindow((TkWindow*)w);
-    if (!wrapper) {
+   if (!wrapper) {
 	Tk_MakeWindowExist(w);
 	TkpWmSetState((TkWindow*)w,WithdrawnState);
 	Tk_MapWindow(w);
@@ -68,7 +68,6 @@ typedef struct {
     /* standard for widget */
     Tk_Window tkwin, drawingWin;
     Window wrapper;
-    Window root;
     Window manager;
 
     Tk_OptionTable options;
@@ -720,7 +719,6 @@ static int TrayIconCreateCmd(ClientData cd, Tcl_Interp *interp,
 	goto handleErrors;
     }
 
-    icon->root = RootWindowOfScreen(Tk_Screen(icon->tkwin));
     icon->a_NET_SYSTEM_TRAY_Sn = DockSelectionAtomFor(icon->tkwin);
     icon->a_NET_SYSTEM_TRAY_OPCODE = Tk_InternAtom(icon->tkwin,"_NET_SYSTEM_TRAY_OPCODE");
     icon->a_XEMBED_INFO = Tk_InternAtom(icon->tkwin,"_XEMBED_INFO");
