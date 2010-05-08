@@ -945,7 +945,6 @@ static int TrayIconCreateCmd(ClientData cd, Tcl_Interp *interp,
 
     icon->trayManager = XGetSelectionOwner(Tk_Display(icon->tkwin),icon->a_NET_SYSTEM_TRAY_Sn);
     if (icon->trayManager) {
-	Tk_CreateErrorHandler(Tk_Display(icon->tkwin),BadWindow,-1,-1, NULL, NULL);
 	XSelectInput(Tk_Display(icon->tkwin),icon->trayManager, StructureNotifyMask);
     }
 
