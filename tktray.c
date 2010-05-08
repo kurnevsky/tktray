@@ -36,12 +36,9 @@
 #define ICON_FLAG_REDRAW_PENDING (1<<0)
 
 
-
-
 #if MAD_TK_PACKAGER
-static void TKU_WmWithdraw(Tk_Window winPtr)
+static void TKU_WmWithdraw(Tk_Window winPtr, Tcl_Interp *interp)
 {
-    Tcl_Interp *interp = Tk_Interp(winPtr);
     Tcl_SavedResult saved;
     Tcl_Obj *wm_withdraw;
 
@@ -65,7 +62,7 @@ static Tk_Window TKU_GetWrapper(Tk_Window winPtr)
     return Tk_IdToWindow(Tk_Display(winPtr), retParent);
 }
 #else
-static void TKU_WmWithdraw(Tk_Window winPtr)
+static void TKU_WmWithdraw(Tk_Window winPtr, Tcl_Interp* interp)
 {
     TkpWmSetState((TkWindow*)winPtr, WithdrawnState);
 }
@@ -86,12 +83,12 @@ int TKU_AddInput( Display* dpy, Window win, long add_to_mask)
 }
 
 /* Get Tk Window wrapper (make it exist if ny) */
-static Tk_Window TKU_Wrapper(Tk_Window w)
+static Tk_Window TKU_Wrapper(Tk_Window w, Tcl_Interp* interp)
 {
     Tk_Window wrapper = TKU_GetWrapper(w);
     if (!wrapper) {
 	Tk_MakeWindowExist(w);
-	TKU_WmWithdraw(w);
+	TKU_WmWithdraw(w, interp);
 	Tk_MapWindow(w);
 	wrapper = TKU_GetWrapper(w);
     }
@@ -400,8 +397,8 @@ static void CreateTrayIconWindow(DockIcon *icon)
 			      TrayIconEvent,(ClientData)icon);
 	Tk_SetWindowBackgroundPixmap(tkwin, ParentRelative);
 	Tk_MakeWindowExist(tkwin);
-	TKU_WmWithdraw(tkwin);
-	wrapper = TKU_Wrapper(tkwin);
+	TKU_WmWithdraw(tkwin,icon->interp);
+	wrapper = TKU_Wrapper(tkwin,icon->interp);
 
 	attr.override_redirect = True;
 	Tk_ChangeWindowAttributes(wrapper,CWOverrideRedirect,&attr);
@@ -584,7 +581,7 @@ static void TrayIconWrapperEvent(ClientData cd, XEvent* ev)
 		/* upon reparent to root, */
 		if (icon->drawingWin) {
 		    /* we were sent away to root */
-		    TKU_WmWithdraw(icon->drawingWin);
+		    TKU_WmWithdraw(icon->drawingWin,icon->interp);
 		    if (icon->myManager)
 			TKU_VirtualEvent(icon->tkwin,Tk_GetUid("IconDestroy"));
 		    icon->myManager = None;
