@@ -400,7 +400,7 @@ in some other way.  The second is generated when the inner window
 is destroyed (you may bind to $icon.inner <Destroy> as well).
 It's not recommended to build complex GUIs in the system tray. Also
 note that the correct handling of the keyboard input is unlikely to
-become possible. Events aren't
+become possible.
 .SH AUTHORS
 Anton Kovalenko
 See \fIhttp://www.sw4me.com/wiki/Tktray\fR.

@@ -170,8 +170,7 @@ will be recreated on a new system tray when it's available.
 
    It's not recommended to build complex GUIs in the system tray. Also
    note that the correct handling of the keyboard input is unlikely to
-   become possible. Events aren't 
-
+   become possible. 
 
 [section AUTHORS]
 Anton Kovalenko
