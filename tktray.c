@@ -1,13 +1,18 @@
 #include <tcl.h>
 #include <tk.h>
+
+#if (!(MAD_TK_PACKAGER))
 #include <tkInt.h>
 #include <tkIntPlatDecls.h>
+#endif
+
 #include <time.h>
 #include <string.h>
 #include <stdio.h>
 
 #include <X11/X.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 
 /* XEmbed definitions
  * See http://www.freedesktop.org/wiki/Standards_2fxembed_2dspec
@@ -30,6 +35,46 @@
 /* Widget states */
 #define ICON_FLAG_REDRAW_PENDING (1<<0)
 
+
+
+
+#if MAD_TK_PACKAGER
+static void TKU_WmWithdraw(Tk_Window winPtr)
+{
+    Tcl_Interp *interp = Tk_Interp(winPtr);
+    Tcl_SavedResult saved;
+    Tcl_Obj *wm_withdraw;
+
+    Tcl_SaveResult(interp,&saved);
+    wm_withdraw = Tcl_NewStringObj("wm withdraw",-1);
+    Tcl_IncrRefCount(wm_withdraw);
+    Tcl_ListObjAppendElement(NULL,wm_withdraw,Tcl_NewStringObj(Tk_PathName(winPtr),-1));
+    Tcl_EvalObj(interp,wm_withdraw);
+    Tcl_RestoreResult(interp,&saved);
+}
+/* the wrapper should exist */
+static Tk_Window TKU_GetWrapper(Tk_Window winPtr)
+{
+    Window retRoot, retParent, *retChildren;
+    unsigned int nChildren;
+    XQueryTree(Tk_Display(winPtr),Tk_WindowId(winPtr),
+	       &retRoot,&retParent,&retChildren,&nChildren);
+    if (nChildren)
+	XFree(retChildren);
+    return Tk_IdToWindow(Tk_Display(winPtr), retParent);
+}
+#else
+static void TKU_WmWithdraw(Tk_Window winPtr)
+{
+    TkpWmSetState((TkWindow*)winPtr, WithdrawnState);
+}
+static Tk_Window TKU_GetWrapper(Tk_Window winPtr)
+{
+    return (Tk_Window)
+	TkpGetWrapperWindow((TkWindow*)winPtr);
+}
+#endif
+
 /* Subscribe for extra X11 events (needed for MANAGER selection) */
 int TKU_AddInput( Display* dpy, Window win, long add_to_mask)
 {
@@ -42,12 +87,12 @@ int TKU_AddInput( Display* dpy, Window win, long add_to_mask)
 /* Get Tk Window wrapper (make it exist if ny) */
 static Tk_Window TKU_Wrapper(Tk_Window w)
 {
-    Tk_Window wrapper = (Tk_Window)TkpGetWrapperWindow((TkWindow*)w);
+    Tk_Window wrapper = TKU_GetWrapper(w);
     if (!wrapper) {
 	Tk_MakeWindowExist(w);
-	TkpWmSetState((TkWindow*)w,WithdrawnState);
+	TKU_WmWithdraw(w);
 	Tk_MapWindow(w);
-	wrapper = (Tk_Window)TkpGetWrapperWindow((TkWindow*)w);
+	wrapper = TKU_GetWrapper(w);
     }
     return wrapper;
 }
@@ -352,7 +397,10 @@ static void CreateTrayIconWindow(DockIcon *icon)
 			      EnterWindowMask|LeaveWindowMask|PointerMotionMask,
 			      TrayIconEvent,(ClientData)icon);
 	Tk_SetWindowBackgroundPixmap(tkwin, ParentRelative);
+	Tk_MakeWindowExist(tkwin);
+	TKU_WmWithdraw(tkwin);
 	wrapper = TKU_Wrapper(tkwin);
+
 	attr.override_redirect = True;
 	Tk_ChangeWindowAttributes(wrapper,CWOverrideRedirect,&attr);
 	Tk_CreateEventHandler(wrapper,StructureNotifyMask,TrayIconWrapperEvent,(ClientData)icon);
@@ -534,8 +582,7 @@ static void TrayIconWrapperEvent(ClientData cd, XEvent* ev)
 		/* upon reparent to root, */
 		if (icon->drawingWin) {
 		    /* we were sent away to root */
-		    TkpWmSetState((TkWindow*)icon->drawingWin, 
-				  WithdrawnState);
+		    TKU_WmWithdraw(icon->drawingWin);
 		    if (icon->myManager)
 			TKU_VirtualEvent(icon->tkwin,Tk_GetUid("IconDestroy"));
 		    icon->myManager = None;

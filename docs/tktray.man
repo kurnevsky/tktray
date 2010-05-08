@@ -140,6 +140,11 @@ will be recreated on a new system tray when it's available.
    it). If this method returns false, the icon is not visible to
    anyone, and no chance to get balloon messages displayed.
 
+[call [arg pathName] [method orientation]]
+
+   Query orientation of a system tray that is currently embedding the
+   icon. 
+
 [list_end]
 
 [section "WINDOW MANAGEMENT"]
@@ -149,28 +154,25 @@ will be recreated on a new system tray when it's available.
    differences (some of them may come up later). System Tray
    specification is based on XEMBED protocol, and the later has a
    problem: when the embedder crashes, nothing can prevent embedded
-   windows from destruction.
-
-   Since tktray 1.3, no explicit icon recreation code is required on
-   Tcl level. The widget was split in two: one represented by a
-   caller-specified name, and another (currently $path.inner) that
-   exists only when a tray is available (and dies and comes back and
-   so on).
+   windows from destruction.  Since tktray 1.3, no explicit icon
+   recreation code is required on Tcl level. The widget was split in
+   two: one represented by a caller-specified name, and another
+   (currently $path.inner) that exists only when a tray is available
+   (and dies and comes back and so on).
 
    This solution has some disadvantages as well.  User-created widget
    is not mapped at all, thus it can't be used any more as a parent
    for other widgets, showing them instead of an image. A temporal
    inner window, however, may contain widgets.
 
-   This version introduces two virtual events, <<IconConfigure>> and
-   <<IconDestroy>>. The first is generated when an icon (the inner
-   window) appears on screen, and when it's moved, resized or changed
-   in some other way.  The second is generated when the inner window
-   is destroyed (you may bind to $icon.inner <Destroy> as well).
+[para]
 
-   It's not recommended to build complex GUIs in the system tray. Also
-   note that the correct handling of the keyboard input is unlikely to
-   become possible. 
+   This version introduces three virtual events: <<IconCreate>>
+   <<IconConfigure>> and <<IconDestroy>>. <<IconCreate>> is generated when
+   docking is requesting for an icon. <<IconConfigure>> is generated 
+   when an icon window is resized or changed in some other way. 
+   <<IconDestroy>> is generated when an icon is destroyed due to panel crash
+   or undocked with unsetting -docked option.
 
 [section AUTHORS]
 Anton Kovalenko
