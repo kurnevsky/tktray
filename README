@@ -65,3 +65,11 @@ scripts using tk 8.4, 8.5 and 8.6.
 See manpage or html page (included in source archive) for usage
 instructions.
 
+Current version of tktray was tested and proved to work with the
+following system tray implementations:
+
+* lxpanel-0.5.5 from LXDE project;
+* gnome-panel 2.30 from Gnome project;
+* stalonetray 0.8.0;
+* trayer 1.0;
+* docker 1.4.
