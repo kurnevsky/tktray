@@ -181,7 +181,7 @@ COMPILE		= $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(C
 # for the BINARIES that you specified above have already been done.
 #========================================================================
 
-all: binaries libraries doc
+all: binaries libraries
 
 #========================================================================
 # The binaries target builds executable programs, Windows .dll's, unix
@@ -201,17 +201,10 @@ libraries:
 #========================================================================
 
 doc:
-
-$(srcdir)/%.n: $(srcdir)/%.man
-	dtplite -o "$@" nroff "$<"
-
-$(srcdir)/%.html: $(srcdir)/%.man
-	dtplite -o "$@" html "$<"
-
-# @echo "If you have documentation to create, place the commands to"
-# @echo "build the docs in the 'doc:' target.  For example:"
-# @echo "        xml2nroff sample.xml > sample.n"
-# @echo "        xml2html sample.xml > sample.html"
+	dtplite -o $(srcdir)/docs/$(PACKAGE_NAME).n nroff \
+		$(srcdir)/docs/$(PACKAGE_NAME).man
+	dtplite -o $(srcdir)/docs/$(PACKAGE_NAME).html html \
+		$(srcdir)/docs/$(PACKAGE_NAME).man
 
 install: all install-binaries install-libraries install-doc
 
@@ -235,7 +228,7 @@ install-libraries: libraries
 # directory.
 #========================================================================
 
-install-doc: doc
+install-doc:
 	@mkdir -p $(DESTDIR)$(mandir)/mann
 	@echo "Installing documentation in $(DESTDIR)$(mandir)"
 	@list='$(srcdir)/docs/*.n'; for i in $$list; do \
