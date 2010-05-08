@@ -718,9 +718,9 @@ ac_user_opts='
 enable_option_checking
 with_tcl
 with_tk
-with_mad_tk_packager
 with_tclinclude
 with_tkinclude
+with_mad_tk_packager
 with_x
 enable_threads
 enable_shared
@@ -1372,9 +1372,9 @@ Optional Packages:
   --with-tcl              directory containing tcl configuration
                           (tclConfig.sh)
   --with-tk               directory containing tk configuration (tkConfig.sh)
-enable building on distributions having no tkIntPlatDecls.h
   --with-tclinclude       directory containing the public Tcl header files
   --with-tkinclude        directory containing the public Tk header files
+enable building on distributions having no tkIntPlatDecls.h
   --with-x                use the X Window System
   --with-celib=DIR        use Windows/CE support library from DIR
 
@@ -5159,19 +5159,6 @@ fi
 #--------------------------------------------------------------------
 
 
-# Check whether --with-mad-tk-packager was given.
-if test "${with_mad_tk_packager+set}" = set; then :
-  withval=$with_mad_tk_packager;
-$as_echo "#define MAD_TK_PACKAGER 1" >>confdefs.h
-
-else
-
-$as_echo "#define MAD_TK_PACKAGER 0" >>confdefs.h
-
-fi
-
-
-
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl public headers" >&5
 $as_echo_n "checking for Tcl public headers... " >&6; }
 
@@ -5356,7 +5343,16 @@ $as_echo "${INCLUDE_DIR_NATIVE}" >&6; }
     fi
 
 
-if test "z${MAD_TK_PACKAGER}" != "z1" ; then
+
+# Check whether --with-mad-tk-packager was given.
+if test "${with_mad_tk_packager+set}" = set; then :
+  withval=$with_mad_tk_packager;
+$as_echo "#define MAD_TK_PACKAGER 1" >>confdefs.h
+
+else
+
+$as_echo "#define MAD_TK_PACKAGER 0" >>confdefs.h
+
 
     # Allow for --with-tclinclude to take effect and define ${ac_cv_c_tclh}
 
@@ -5486,6 +5482,9 @@ $as_echo_n "checking for Tk private include files... " >&6; }
 $as_echo "${result}" >&6; }
 
 fi
+
+
+
 
     if test "${TEA_WINDOWINGSYSTEM}" = "x11" ; then
 

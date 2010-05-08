@@ -1,7 +1,7 @@
 #include <tcl.h>
 #include <tk.h>
 
-#if (!(MAD_TK_PACKAGER))
+#if !MAD_TK_PACKAGER
 #include <tkInt.h>
 #include <tkIntPlatDecls.h>
 #endif

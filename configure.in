@@ -114,17 +114,16 @@ AC_SUBST(CLEANFILES)
 # This MUST be called after TEA_LOAD_TCLCONFIG / TEA_LOAD_TKCONFIG
 #--------------------------------------------------------------------
 
-AC_ARG_WITH([mad-tk-packager],[enable building on distributions having no tkIntPlatDecls.h],
-    [AC_DEFINE(MAD_TK_PACKAGER, 1, [Mad tk packager])],
-    [AC_DEFINE(MAD_TK_PACKAGER, 0, [Reasonable packager])])
-    
 TEA_PUBLIC_TCL_HEADERS
 TEA_PUBLIC_TK_HEADERS
 
-if test "z${MAD_TK_PACKAGER}" != "z1" ; then
-    TEA_PRIVATE_TCL_HEADERS
-    TEA_PRIVATE_TK_HEADERS
-fi
+AC_ARG_WITH([mad-tk-packager],[enable building on distributions having no tkIntPlatDecls.h],
+    [AC_DEFINE(MAD_TK_PACKAGER, 1, [Mad tk packager]) ],
+    [AC_DEFINE(MAD_TK_PACKAGER, 0, [Reasonable packager])
+	TEA_PRIVATE_TCL_HEADERS
+	TEA_PRIVATE_TK_HEADERS])
+    
+
 TEA_PATH_X
 
 
