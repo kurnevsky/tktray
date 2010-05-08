@@ -262,7 +262,7 @@ static int TrayIconObjectCmd(ClientData cd, Tcl_Interp *interp,
 	    Tcl_WrongNumArgs(interp, 2, objv, "messageId");
 	    return TCL_ERROR;
 	}
-	if (Tcl_GetIntFromObj(interp,objv[1],&msgid)!=TCL_OK) {
+	if (Tcl_GetIntFromObj(interp,objv[2],&msgid)!=TCL_OK) {
 	    return TCL_ERROR;
 	}
 	if (msgid)
@@ -454,7 +454,7 @@ TrayIconRequestSize(DockIcon* icon, int w, int h)
 	if (icon->requestedWidth != w ||
 	    icon->requestedHeight != h) {
 	    Tk_SetMinimumRequestSize(icon->drawingWin,w,h);
-	    /* Tk_GeometryRequest(icon->drawingWin,w,h); */
+	    Tk_GeometryRequest(icon->drawingWin,w,h);
 	    Tk_SetGrid(icon->drawingWin,1,1,w,h);
 	    icon->requestedWidth = w;
 	    icon->requestedHeight = h;
