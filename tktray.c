@@ -271,11 +271,6 @@ static void XembedRequest(DockIcon *icon, long xembedState)
 
 static void DockToManager(DockIcon *icon)
 {
-    long info[] = { 0, XEMBED_MAPPED };
-    Tk_Window tkwin = icon->drawingWin;
-    XEvent ev;
-    Display *dpy = Tk_Display(tkwin);
-
     icon->myManager = icon->trayManager;
     TKU_VirtualEvent(icon->tkwin,Tk_GetUid("IconCreate"));
     XembedRequest(icon, XEMBED_MAPPED);
@@ -286,7 +281,6 @@ static void Dock(DockIcon *icon)
     Tk_Window tkwin = icon->drawingWin;
     Tk_Window wrapper;
     XSetWindowAttributes attr;
-    long info[] = { 0, XEMBED_MAPPED };
 
     /* will adjust geometry if there is an image */
     TrayIconForceImageChange(icon);
@@ -458,7 +452,8 @@ static void TrayIconWrapperEvent(ClientData cd, XEvent* ev)
 		/* upon reparent to root, */
 		if (icon->drawingWin) {
 		    /* we were sent away to root */
-		    TkpWmSetState(icon->drawingWin, WithdrawnState);
+		    TkpWmSetState((TkWindow*)icon->drawingWin, 
+				  WithdrawnState);
 		    icon->myManager = None;
 		}
 	    } /* Reparenting into some other embedder is theoretically possible,
