@@ -25,21 +25,43 @@ It normally results in the icon being added to the tray.
 
 If there is no system tray at the icon creation time, the icon will be
 invisible. When a new system tray appears, the icon will be added to
-it. Since tktray 1.3, when the tray crashes and destroys your icon, it
+it. Since tktray 1.3, if the tray crashes and destroys your icon, it
 will be recreated on a new system tray when it's available.
 
 [list_begin opt]
 [opt_def "-class"]
-   WM_CLASS attribute for the icon window. Tray manager may use class name
-   to remember icon position or other attributes. This name may also be used 
-   for event binding. 
+   WM_CLASS attribute for icon window. Tray manager may use class name
+   to remember icon position or other attributes. This name may be used 
+   for event binding as well.
 
+   For now, real icon window is distinct from the user-specified
+   widget: it may be recreated and destroyed several times during icon
+   lifetime, when a system tray crashes, terminates, disappears or
+   appears. However, tktray tries to forward click and motion events
+   from this inner window to user widget, so event bindings on widget name
+   should work as they used to.
+
+   This option applies to a real icon window, not to a user-visible widget,
+   so don't rely on it to set widget defaults from an option database:
+   the standard "TrayIcon" class name is used for it.
+
+[opt_def "-docked"]
+   boolean indicating whether the real icon window should be embedded into
+   a tray when it exists. Think of it as a heavier version of -visible option:
+   there is a guarantee that no place for icon will be reserved on any tray.
+   
 [opt_def "-image"]
    image to show in the system tray. Since tktray 1.3, image type "photo"
    is not mandatory anymore.
 
-   The icon will be automatically redrawn or resized 
-   appropriately on any image modifications.
+   Icon will be automatically redrawn on any image modifications. For
+   Tk, deleting an image and creating an image with the same name
+   later is a kind of image modification, and tktray follows this
+   convention.  Photo image operations that modify existing image
+   content are another example of events triggering redisplay.
+
+   Requested size for icon is set according to the image's width and height,
+   but obeying (or disobeying) this request is left for the tray.
 
 [opt_def "-shape"] used to put a nonrectangular shape on an icon
    window. Ignored for compatibility.
@@ -50,11 +72,43 @@ will be recreated on a new system tray when it's available.
    visible or not. Thus  when invisible icon becomes visible, its position
    on the system tray is likely to remain the same.
 
+   Tktray currently tries to find a tray and embed into it as soon as
+   possible, whether -visible is true or not. _XEMBED_INFO property is
+   set for embedded window: a tray should show or hide an icon
+   depending on this property. There may be, and indeed are,
+   incomplete tray implementations ignoring _XEMBED_INFO (ex. docker).
+   Gnome-panel "unmaps" an icon by making it one pixel wide, that
+   might to be what you expect.
+
+   For those implementations, the place for an icon will be reserved
+   but no image will be displayed: tktray takes care of it. Tktray
+   also blocks mouse event forwarding for invisible icons, so you may
+   be confident that no <Button> bindings will be invoked at this time.
+
 [list_end]
 
-[call [arg pathName] [method configure] [opt [arg options]]]
-   
-   Modify icon's options after it was created. 
+[call [arg pathName] [method balloon] [arg message] [opt [arg msec_timeout]]]
+
+   Post a message that any decent tray implementation would show
+   alongside the icon (or a place allocated for it). The message will
+   disappear automatically after $msec_timeout
+   milliseconds. Unfortunately, there is absolutely no way to know if
+   the tray supports this feature, so don't rely on it for any
+   critical information to be delivered. When no timeout or zero
+   timeout is given, the message should not be hidden without user
+   action (usually a mouse click).
+
+   The return value is an integer, a message handle that may be used
+   for cancelling the message before timeout expiration, or zero if
+   there is currently no system tray to handle the request.
+
+[call [arg pathName] [method cancel] [arg message_handle]]
+
+   Cancel an earlier-posted balloon message. Zero message_handle is
+   silently ignored. If there is no message with this handle, or its
+   timeout has expired, or it was posted to another system tray and is
+   unknow to the current one, nothing bad should happen (but it
+   depends on the tray implementation).
 
 [call [arg pathName] [method bbox]]
    
@@ -71,6 +125,20 @@ will be recreated on a new system tray when it's available.
    you'd like to have a popup menu, but where it should be posted?
    Use %W bbox to determine it right at the moment when a click happened.
 
+[call [arg pathName] [method cget] [arg option]]
+
+   Retrieve current option value as set by the caller. 
+
+[call [arg pathName] [method configure] [opt [arg options]]]
+   
+   Modify icon's options after it was created. 
+
+[call [arg pathName] [method docked]]
+
+   Query icon if it's currently embedded into some system
+   tray. Invisible icons may be docked too (and tktray strives for
+   it). If this method returns false, the icon is not visible to
+   anyone, and no chance to get balloon messages displayed.
 
 [list_end]
 

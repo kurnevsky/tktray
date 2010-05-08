@@ -18,6 +18,8 @@ if {[catch {
     set count 2
 }
 
+bind WildIcon <Create> {puts "created icon as %W"}
+
 if {$count==4} {
 set rrc 0
 proc regrad {} {
@@ -29,7 +31,7 @@ regrad
 }
 set idx 1
 if 1 {
-    ::tktray::icon .myi -image ico2 
+    ::tktray::icon .myi -image ico2  -class WildIcon
     puts [winfo id .myi]
     bind .myi <1> {
 	.myi configure -image ico$idx
@@ -52,6 +54,7 @@ if 1 {
     bind . <F4> { .myi balloon "Hello, World! Howdy?" }
     bind .myi <3> {after 2000 {puts "2 secs elapsed, let's talk...";.myi balloon "Натурально, Бендер, вы не понимаете...\nМолчите! моя специальность - гусь!" } }
     bind .myi <2> { .myi configure -visible 0; after 5000 {.myi configure -visible 1}}
+    bind .myi <Control-2> { .myi configure -docked 0; after 5000 {.myi configure -docked 1}}
     bind .myi <Shift-2> { .myi configure -image ""; after 5000 {.myi configure -image ico1}}
     bind .myi <Shift-3> { image delete ico1 }
     after 4000 {.myi balloon "Hello, World! Howdy?" }
