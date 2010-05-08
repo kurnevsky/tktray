@@ -511,7 +511,7 @@ static void TrayIconEvent(ClientData cd, XEvent* ev)
     case ButtonRelease:
     case EnterNotify:
     case LeaveNotify:
-	/* RetargetEvent(icon,ev); */
+	RetargetEvent(icon,ev);
 	break;
 
     }
@@ -647,7 +647,8 @@ static void TrayIconUpdate(DockIcon* icon, int mask)
     /* why should someone need this option?
        anyway, let's handle it if we provide it */
     if (mask & ICON_CONF_CLASS) {
-	Tk_SetClass(icon->tkwin,Tk_GetUid(icon->classString));
+	if (icon->drawingWin)
+	    Tk_SetClass(icon->drawingWin,Tk_GetUid(icon->classString));
     }
     /*
        First, ensure right icon visibility.
@@ -660,41 +661,34 @@ static void TrayIconUpdate(DockIcon* icon, int mask)
     */
     if (mask & ICON_CONF_XEMBED) {
 	if (!icon->visible) {
-	    if (!icon->drawingWin) {
-		/* probably we're running generic handler */
-	    } else {
-		/* Xembedding ends right here,
-		   and no generic handler is running */
-		Tk_DestroyWindow(icon->drawingWin);
-		icon->drawingWin = NULL;
-		icon->wrapper = None;
-		icon->myManager = None;
+	    if (icon->drawingWin) {
+		XembedRequest(icon,0);
 	    }
 	} else { /* icon should be visible but isn't (and we know no window present) */
-
-	    printf("Mgr state: 0x%08x now, 0x%08x last\n",(int)icon->trayManager,(int)icon->myManager);
-	    if (icon->trayManager != None && icon->myManager == None) {
-		if (!icon->drawingWin) {
-		    Tcl_SavedResult oldResult;
-		    printf("Docking for the first time\n");
-		    Tcl_SaveResult(icon->interp, &oldResult);
-		    /* icon->drawingWin = Tk_CreateAnonymousWindow(icon->interp, icon->tkwin, NULL); */
-		    icon->drawingWin = Tk_CreateWindow(icon->interp, icon->tkwin, "inner", "");
-		    if (icon->drawingWin) {
-			Tk_SetClass(icon->drawingWin,icon->classString);
-			Tk_CreateEventHandler(icon->drawingWin,ExposureMask|StructureNotifyMask|ButtonPressMask|ButtonReleaseMask|
-					      EnterWindowMask|LeaveWindowMask|PointerMotionMask,
-					      TrayIconEvent,(ClientData)icon);
-			Dock(icon);
+	    if (icon->myManager != None) {
+		XembedRequest(icon,XEMBED_MAPPED);
+	    } else {
+		if (icon->trayManager != None) {
+		    if (!icon->drawingWin) {
+			Tcl_SavedResult oldResult;
+			Tcl_SaveResult(icon->interp, &oldResult);
+			/* icon->drawingWin = Tk_CreateAnonymousWindow(icon->interp, icon->tkwin, NULL); */
+			icon->drawingWin = Tk_CreateWindow(icon->interp, icon->tkwin, "inner", "");
+			if (icon->drawingWin) {
+			    Tk_SetClass(icon->drawingWin,icon->classString);
+			    Tk_CreateEventHandler(icon->drawingWin,ExposureMask|StructureNotifyMask|ButtonPressMask|ButtonReleaseMask|
+						  EnterWindowMask|LeaveWindowMask|PointerMotionMask,
+						  TrayIconEvent,(ClientData)icon);
+			    Dock(icon);
+			} else {
+			    Tcl_BackgroundError(icon->interp);
+			}
+			Tcl_RestoreResult(icon->interp, &oldResult);
 		    } else {
-			Tcl_BackgroundError(icon->interp);
+			DockToManager(icon);
 		    }
-		    Tcl_RestoreResult(icon->interp, &oldResult);
-		} else {
-		    printf("Redocking present\n");
-		    DockToManager(icon);
-		}
-	    } 
+		} 
+	    }
 	}
     }
     if (mask & ICON_CONF_IMAGE) {
