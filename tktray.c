@@ -384,7 +384,7 @@ static void DisplayIcon(ClientData cd)
     if (icon->drawingWin) {
 	XClearWindow(Tk_Display(icon->drawingWin),
 		     TKU_XID(icon->drawingWin));
-	if (icon->image) {
+	if (icon->image && icon->visible) {
 	    int imgx, imgy, outx, outy, outw, outh;
 	    imgx = (icon->width >= w) ? 0 : -(icon->width - w)/2;
 	    imgy = (icon->height >= h) ? 0 : -(icon->height - h)/2;
@@ -663,7 +663,7 @@ static void TrayIconUpdate(DockIcon* icon, int mask)
 	if (!icon->visible) {
 	    if (icon->drawingWin) {
 		XembedRequest(icon,0);
-	    }
+	    } 
 	} else { /* icon should be visible but isn't (and we know no window present) */
 	    if (icon->myManager != None) {
 		XembedRequest(icon,XEMBED_MAPPED);
