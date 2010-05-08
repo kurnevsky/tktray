@@ -1154,7 +1154,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
     AS_IF([test "$GCC" = yes], [
 	# TEA specific:
 	CFLAGS_OPTIMIZE=-O2
-	CFLAGS_WARNING="-W -Wall -Wno-unused-parameter -Wno-missing-field-initializers"
+	CFLAGS_WARNING="-W -Wall -Wno-unused-parameter -Wno-missing-field-initializers -ansi -pedantic"
     ], [CFLAGS_WARNING=""])
     TCL_NEEDS_EXP_FILE=0
     TCL_BUILD_EXP_FILE=""

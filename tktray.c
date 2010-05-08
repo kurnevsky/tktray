@@ -354,7 +354,8 @@ static Atom DockSelectionAtomFor(Tk_Window tkwin)
 
 static void XembedSetState(DockIcon *icon, long xembedState)
 {
-    long info[] = { 0, xembedState };
+    long info[] = { 0, 0 };
+    info[1] = xembedState;
     if (icon->drawingWin) {
 	XChangeProperty(Tk_Display(icon->drawingWin),
 			icon->wrapper,
