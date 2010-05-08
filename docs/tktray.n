@@ -261,6 +261,8 @@ package require \fBtktray  ?1.0?\fR
 .sp
 \fIpathName\fR \fBdocked\fR
 .sp
+\fIpathName\fR \fBorientation\fR
+.sp
 .BE
 .SH DESCRIPTION
 .PP
@@ -376,6 +378,10 @@ Query icon if it's currently embedded into some system
 tray. Invisible icons may be docked too (and tktray strives for
 it). If this method returns false, the icon is not visible to
 anyone, and no chance to get balloon messages displayed.
+.TP
+\fIpathName\fR \fBorientation\fR
+Query orientation of a system tray that is currently embedding the
+icon.
 .PP
 .SH "WINDOW MANAGEMENT"
 Current implementation of tktray is designed to present an
@@ -383,24 +389,22 @@ interface of a usual toplevel window, but there are some important
 differences (some of them may come up later). System Tray
 specification is based on XEMBED protocol, and the later has a
 problem: when the embedder crashes, nothing can prevent embedded
-windows from destruction.
-Since tktray 1.3, no explicit icon recreation code is required on
-Tcl level. The widget was split in two: one represented by a
-caller-specified name, and another (currently $path.inner) that
-exists only when a tray is available (and dies and comes back and
-so on).
+windows from destruction.  Since tktray 1.3, no explicit icon
+recreation code is required on Tcl level. The widget was split in
+two: one represented by a caller-specified name, and another
+(currently $path.inner) that exists only when a tray is available
+(and dies and comes back and so on).
 This solution has some disadvantages as well.  User-created widget
 is not mapped at all, thus it can't be used any more as a parent
 for other widgets, showing them instead of an image. A temporal
 inner window, however, may contain widgets.
-This version introduces two virtual events, <<IconConfigure>> and
-<<IconDestroy>>. The first is generated when an icon (the inner
-window) appears on screen, and when it's moved, resized or changed
-in some other way.  The second is generated when the inner window
-is destroyed (you may bind to $icon.inner <Destroy> as well).
-It's not recommended to build complex GUIs in the system tray. Also
-note that the correct handling of the keyboard input is unlikely to
-become possible.
+.PP
+This version introduces three virtual events: <<IconCreate>>
+<<IconConfigure>> and <<IconDestroy>>. <<IconCreate>> is generated when
+docking is requesting for an icon. <<IconConfigure>> is generated
+when an icon window is resized or changed in some other way.
+<<IconDestroy>> is generated when an icon is destroyed due to panel crash
+or undocked with unsetting -docked option.
 .SH AUTHORS
 Anton Kovalenko
 See \fIhttp://www.sw4me.com/wiki/Tktray\fR.

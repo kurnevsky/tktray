@@ -50,6 +50,7 @@ static void TKU_WmWithdraw(Tk_Window winPtr)
     Tcl_IncrRefCount(wm_withdraw);
     Tcl_ListObjAppendElement(NULL,wm_withdraw,Tcl_NewStringObj(Tk_PathName(winPtr),-1));
     Tcl_EvalObj(interp,wm_withdraw);
+    Tcl_DecrRefCount(wm_withdraw);
     Tcl_RestoreResult(interp,&saved);
 }
 /* the wrapper should exist */
