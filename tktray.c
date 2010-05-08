@@ -110,37 +110,37 @@ typedef struct {
 	*classString; /* option: -class as string */
 } DockIcon;
 
-static void EventuallyRedrawIcon(DockIcon* icon);
-static void DisplayIcon(ClientData cd);
-static int IconGenericHandler(ClientData cd, XEvent *ev);
-
-static int PostBalloon(DockIcon* icon, const char * utf8msg,
-		       long timeout);
-static void CancelBalloon(DockIcon* icon, int msgid);
 
 static int TrayIconCreateCmd(ClientData cd, Tcl_Interp *interp,
 			     int objc, Tcl_Obj * CONST objv[]);
 static int TrayIconObjectCmd(ClientData cd, Tcl_Interp *interp,
 			     int objc, Tcl_Obj * CONST objv[]);
+static int TrayIconConfigureMethod(DockIcon *icon, Tcl_Interp* interp,
+				   int objc, Tcl_Obj* CONST objv[],
+				   int addflags);
+static int PostBalloon(DockIcon* icon, const char * utf8msg,
+		       long timeout);
+static void CancelBalloon(DockIcon* icon, int msgid);
+
+
 static void TrayIconDeleteProc( ClientData cd );
 static Atom DockSelectionAtomFor(Tk_Window tkwin);
-static void Dock(DockIcon *icon);
+static void DockToManager(DockIcon *icon);
+static void CreateTrayIconWindow(DockIcon *icon);
 
-static int TrayIconConfigureMethod(DockIcon *icon, Tcl_Interp* interp,
-				   int objc, Tcl_Obj* CONST objv[],
-				   int addflags);
+static void TrayIconRequestSize(DockIcon* icon, int w, int h);
 static void TrayIconForceImageChange(DockIcon* icon);
+static void TrayIconUpdate(DockIcon* icon, int mask);
 
-static void TrayIconUpdate(DockIcon* icon, int mask);
+static void EventuallyRedrawIcon(DockIcon* icon);
+static void DisplayIcon(ClientData cd);
+
 static void RetargetEvent(DockIcon *icon, XEvent *ev);
-static void TrayIconUpdate(DockIcon* icon, int mask);
-static int TrayIconConfigureMethod(DockIcon *icon, Tcl_Interp* interp,
-				   int objc, Tcl_Obj* CONST objv[],
-				   int addflags);
 
 static void TrayIconEvent(ClientData cd, XEvent* ev);
 static void UserIconEvent(ClientData cd, XEvent* ev);
 static void TrayIconWrapperEvent(ClientData cd, XEvent* ev);
+static int IconGenericHandler(ClientData cd, XEvent *ev);
 
 int Tktray_Init ( Tcl_Interp* interp );
 
@@ -245,17 +245,24 @@ static Atom DockSelectionAtomFor(Tk_Window tkwin)
     return Tk_InternAtom(tkwin,buf);
 }
 
-static void XembedRequest(DockIcon *icon, long xembedState)
+static void XembedSetState(DockIcon *icon, long xembedState)
 {
     long info[] = { 0, xembedState };
+    if (icon->drawingWin) {
+	XChangeProperty(Tk_Display(icon->drawingWin),
+			icon->wrapper,
+			icon->a_XEMBED_INFO, 
+			icon->a_XEMBED_INFO, 32,
+			PropModeReplace, (unsigned char*)info, 2);
+    }
+}
+
+static void XembedRequestDock(DockIcon *icon)
+{
     Tk_Window tkwin = icon->drawingWin;
     XEvent ev;
     Display *dpy = Tk_Display(tkwin);
-    XChangeProperty(Tk_Display(tkwin),
-		    icon->wrapper,
-		    icon->a_XEMBED_INFO, icon->a_XEMBED_INFO, 32,
-		    PropModeReplace, (unsigned char*)info, 2);
-
+    
     memset(&ev, 0, sizeof(ev));
     ev.xclient.type = ClientMessage;
     ev.xclient.window = icon->myManager;
@@ -269,31 +276,41 @@ static void XembedRequest(DockIcon *icon, long xembedState)
     XSendEvent(dpy, icon->myManager, True, NoEventMask, &ev);
 }
 
+static void CreateTrayIconWindow(DockIcon *icon)
+{
+    Tcl_SavedResult oldResult;
+    Tk_Window tkwin;
+    Tk_Window wrapper;
+    XSetWindowAttributes attr;
+
+    Tcl_SaveResult(icon->interp, &oldResult);
+    tkwin = icon->drawingWin = Tk_CreateWindow(icon->interp, icon->tkwin, "inner", "");
+    if (tkwin) {
+	Tk_SetClass(icon->drawingWin,icon->classString);
+	Tk_CreateEventHandler(icon->drawingWin,ExposureMask|StructureNotifyMask|ButtonPressMask|ButtonReleaseMask|
+			      EnterWindowMask|LeaveWindowMask|PointerMotionMask,
+			      TrayIconEvent,(ClientData)icon);
+	Tk_SetWindowBackgroundPixmap(tkwin, ParentRelative);
+	wrapper = TKU_Wrapper(tkwin);
+	attr.override_redirect = True;
+	Tk_ChangeWindowAttributes(wrapper,CWOverrideRedirect,&attr);
+	Tk_CreateEventHandler(wrapper,StructureNotifyMask,TrayIconWrapperEvent,(ClientData)icon);
+	Tk_SetWindowBackgroundPixmap(wrapper, ParentRelative);
+	/* Tk_MoveToplevelWindow(icon->drawingWin,0,0); */
+	icon->wrapper = TKU_XID(wrapper);
+	TrayIconForceImageChange(icon);
+    } else {
+	Tcl_BackgroundError(icon->interp);
+    }
+    Tcl_RestoreResult(icon->interp, &oldResult);
+}
+
 static void DockToManager(DockIcon *icon)
 {
     icon->myManager = icon->trayManager;
     TKU_VirtualEvent(icon->tkwin,Tk_GetUid("IconCreate"));
-    XembedRequest(icon, XEMBED_MAPPED);
-}
-
-static void Dock(DockIcon *icon)
-{
-    Tk_Window tkwin = icon->drawingWin;
-    Tk_Window wrapper;
-    XSetWindowAttributes attr;
-
-    /* will adjust geometry if there is an image */
-    TrayIconForceImageChange(icon);
-    Tk_SetWindowBackgroundPixmap(tkwin, ParentRelative);
-    wrapper = TKU_Wrapper(tkwin);
-    attr.override_redirect = True;
-    Tk_ChangeWindowAttributes(wrapper,CWOverrideRedirect,&attr);
-    Tk_CreateEventHandler(wrapper,StructureNotifyMask,TrayIconWrapperEvent,(ClientData)icon);
-    Tk_SetWindowBackgroundPixmap(wrapper, ParentRelative);
-    Tk_MoveToplevelWindow(icon->drawingWin,0,0);
-    
-    icon->wrapper = TKU_XID(wrapper);
-    DockToManager(icon);
+    XembedSetState(icon, icon->visible ? XEMBED_MAPPED : 0);
+    XembedRequestDock(icon);
 }
 
 static
@@ -313,7 +330,7 @@ Tk_OptionSpec IconOptionSpec[]={
     {TK_OPTION_BOOLEAN,"-visible","visible","Visible",
      "1", -1, Tk_Offset(DockIcon, visible),
      0, (ClientData) NULL,
-     ICON_CONF_XEMBED},
+     ICON_CONF_XEMBED | ICON_CONF_REDISPLAY},
     {TK_OPTION_END}
 };
 
@@ -454,7 +471,10 @@ static void TrayIconWrapperEvent(ClientData cd, XEvent* ev)
 		    /* we were sent away to root */
 		    TkpWmSetState((TkWindow*)icon->drawingWin, 
 				  WithdrawnState);
+		    if (icon->myManager)
+			TKU_VirtualEvent(icon->tkwin,Tk_GetUid("IconDestroy"));
 		    icon->myManager = None;
+
 		}
 	    } /* Reparenting into some other embedder is theoretically possible,
 		 and everything would just work in this case */
@@ -481,7 +501,9 @@ static void TrayIconEvent(ClientData cd, XEvent* ev)
 	   If unreal window is destroyed first, freeing the data structures
 	   is the only thing to do.
 	*/
-	TKU_VirtualEvent(icon->tkwin,Tk_GetUid("IconDestroy"));
+	if (icon->myManager) {
+	    TKU_VirtualEvent(icon->tkwin,Tk_GetUid("IconDestroy"));
+	}
 	Tcl_CancelIdleCall(DisplayIcon,(ClientData)icon);
 	icon->flags &= ~ICON_FLAG_REDRAW_PENDING;
 	icon->drawingWin = NULL;
@@ -655,35 +677,17 @@ static void TrayIconUpdate(DockIcon* icon, int mask)
        generic handler should be abandoned.
     */
     if (mask & ICON_CONF_XEMBED) {
-	if (!icon->visible) {
-	    if (icon->drawingWin) {
-		XembedRequest(icon,0);
-	    } 
-	} else { /* icon should be visible but isn't (and we know no window present) */
-	    if (icon->myManager != None) {
-		XembedRequest(icon,XEMBED_MAPPED);
-	    } else {
-		if (icon->trayManager != None) {
-		    if (!icon->drawingWin) {
-			Tcl_SavedResult oldResult;
-			Tcl_SaveResult(icon->interp, &oldResult);
-			/* icon->drawingWin = Tk_CreateAnonymousWindow(icon->interp, icon->tkwin, NULL); */
-			icon->drawingWin = Tk_CreateWindow(icon->interp, icon->tkwin, "inner", "");
-			if (icon->drawingWin) {
-			    Tk_SetClass(icon->drawingWin,icon->classString);
-			    Tk_CreateEventHandler(icon->drawingWin,ExposureMask|StructureNotifyMask|ButtonPressMask|ButtonReleaseMask|
-						  EnterWindowMask|LeaveWindowMask|PointerMotionMask,
-						  TrayIconEvent,(ClientData)icon);
-			    Dock(icon);
-			} else {
-			    Tcl_BackgroundError(icon->interp);
-			}
-			Tcl_RestoreResult(icon->interp, &oldResult);
-		    } else {
-			DockToManager(icon);
-		    }
-		} 
+	if (icon->myManager == None &&
+	    icon->trayManager != None) {
+	    if (!icon->drawingWin) {
+		CreateTrayIconWindow(icon);
 	    }
+	    if (icon->drawingWin) {
+		DockToManager(icon);
+	    }
+	}
+	if (icon->drawingWin) {
+	    XembedSetState(icon, icon->visible ? XEMBED_MAPPED : 0);
 	}
     }
     if (mask & ICON_CONF_IMAGE) {
