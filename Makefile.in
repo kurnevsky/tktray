@@ -320,7 +320,7 @@ dist: dist-clean
 	chmod 664 $(DIST_DIR)/tclconfig/tcl.m4
 	chmod +x $(DIST_DIR)/tclconfig/install-sh
 
-	list='demos doc generic library mac tests unix win'; \
+	list='demos docs generic library mac tests unix win'; \
 	for p in $$list; do \
 	    if test -d $(srcdir)/$$p ; then \
 		mkdir $(DIST_DIR)/$$p; \

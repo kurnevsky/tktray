@@ -1,4 +1,4 @@
-catch {load [lindex [glob ./libtktray1.*.so] end]} msg
+#catch {load [lindex [glob ./libtktray1.*.so] end]} msg
 
 package require tktray 1.0
 wm withdraw .
