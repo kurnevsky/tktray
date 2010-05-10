@@ -269,7 +269,7 @@ static int TrayIconObjectCmd(ClientData cd, Tcl_Interp *interp,
 	    TrayIconConfigureMethod(icon,interp,objc-2,objv+2,0);
     case XWC_CGET:
 	if (objc!=3) {
-	    Tcl_WrongNumArgs(interp,1,objv,"option");
+	    Tcl_WrongNumArgs(interp,2,objv,"option");
 	    return TCL_ERROR;
 	}
 	optionValue = Tk_GetOptionValue(interp,(char*)icon,icon->options,objv[2],icon->tkwin);
