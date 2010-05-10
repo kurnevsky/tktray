@@ -1,3 +1,12 @@
+2010-05-10  Anton Kovalenko  <anton@sw4me.com>
+
+	* configure.in: version is now 1.3.6;
+
+	* tktray.c: fixed some trivial bugs with option
+	handling (e.g. cget method); added ARGB32 image output
+	support (server-side natural alpha composition).
+	* tests/all.tcl: added a non-photo image to test this code path
+
 2010-05-08  Anton Kovalenko  <anton@sw4me.com>
 
 	* configure.in: version is now 1.3.2.
