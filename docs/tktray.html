@@ -1,0 +1,275 @@
+<html><head>
+<title>tktray - tktray</title>
+<style type="text/css"><!--
+    HTML {
+	background: 	#FFFFFF;
+	color: 		black;
+    }
+    BODY {
+	background: 	#FFFFFF;
+	color:	 	black;
+    }
+    DIV.doctools {
+	margin-left:	10%;
+	margin-right:	10%;
+    }
+    DIV.doctools H1,DIV.doctools H2 {
+	margin-left:	-5%;
+    }
+    H1, H2, H3, H4 {
+	margin-top: 	1em;
+	font-family:	sans-serif;
+	font-size:	large;
+	color:		#005A9C;
+	background: 	transparent;
+	text-align:		left;
+    }
+    H1.title {
+	text-align: center;
+    }
+    UL,OL {
+	margin-right: 0em;
+	margin-top: 3pt;
+	margin-bottom: 3pt;
+    }
+    UL LI {
+	list-style: disc;
+    }
+    OL LI {
+	list-style: decimal;
+    }
+    DT {
+	padding-top: 	1ex;
+    }
+    UL.toc,UL.toc UL, UL.toc UL UL {
+	font:		normal 12pt/14pt sans-serif;
+	list-style:	none;
+    }
+    LI.section, LI.subsection {
+	list-style: 	none;
+	margin-left: 	0em;
+	text-indent:	0em;
+	padding: 	0em;
+    }
+    PRE {
+	display: 	block;
+	font-family:	monospace;
+	white-space:	pre;
+	margin:		0%;
+	padding-top:	0.5ex;
+	padding-bottom:	0.5ex;
+	padding-left:	1ex;
+	padding-right:	1ex;
+	width:		100%;
+    }
+    PRE.example {
+	color: 		black;
+	background: 	#f5dcb3;
+	border:		1px solid black;
+    }
+    UL.requirements LI, UL.syntax LI {
+	list-style: 	none;
+	margin-left: 	0em;
+	text-indent:	0em;
+	padding:	0em;
+    }
+    DIV.synopsis {
+	color: 		black;
+	background: 	#80ffff;
+	border:		1px solid black;
+	font-family:	serif;
+	margin-top: 	1em;
+	margin-bottom: 	1em;
+    }
+    UL.syntax {
+	margin-top: 	1em;
+	border-top:	1px solid black;
+    }
+    UL.requirements {
+	margin-bottom: 	1em;
+	border-bottom:	1px solid black;
+    }
+--></style>
+</head>
+<! -- Generated from file './docs/tktray.man' by tcllib/doctools with format 'html'
+   -->
+<! -- Copyright &copy; 2005, Anton Kovalenko
+   -->
+<! -- CVS: $Id$ tktray.n
+   -->
+<body><div class="doctools">
+<h1 class="title">tktray(n) 1.0 tktray &quot;tktray&quot;</h1>
+<div id="name" class="section"><h2><a name="name">Name</a></h2>
+<p>tktray - System Tray Icon Support for Tk on X11</p>
+</div>
+<div id="toc" class="section"><h2><a name="toc">Table Of Contents</a></h2>
+<ul class="toc">
+<li class="section"><a href="#toc">Table Of Contents</a></li>
+<li class="section"><a href="#synopsis">Synopsis</a></li>
+<li class="section"><a href="#section1">Description</a></li>
+<li class="section"><a href="#section2">COMMANDS</a></li>
+<li class="section"><a href="#section3">WINDOW MANAGEMENT</a></li>
+<li class="section"><a href="#section4">AUTHORS</a></li>
+<li class="section"><a href="#keywords">Keywords</a></li>
+<li class="section"><a href="#copyright">Copyright</a></li>
+</ul>
+</div>
+<div id="synopsis" class="section"><h2><a name="synopsis">Synopsis</a></h2>
+<div class="synopsis">
+<ul class="requirements">
+<li>package require <b class="pkgname">Tcl 8.4</b></li>
+<li>package require <b class="pkgname">tktray <span class="opt">?1.0?</span></b></li>
+</ul>
+<ul class="syntax">
+<li><a href="#1"><b class="cmd">tktray::icon</b> <i class="arg">pathName</i> <span class="opt">?<i class="arg">options</i>?</span></a></li>
+<li><a href="#2"><i class="arg">pathName</i> <b class="method">balloon</b> <i class="arg">message</i> <span class="opt">?<i class="arg">msec_timeout</i>?</span></a></li>
+<li><a href="#3"><i class="arg">pathName</i> <b class="method">cancel</b> <i class="arg">message_handle</i></a></li>
+<li><a href="#4"><i class="arg">pathName</i> <b class="method">bbox</b></a></li>
+<li><a href="#5"><i class="arg">pathName</i> <b class="method">cget</b> <i class="arg">option</i></a></li>
+<li><a href="#6"><i class="arg">pathName</i> <b class="method">configure</b> <span class="opt">?<i class="arg">options</i>?</span></a></li>
+<li><a href="#7"><i class="arg">pathName</i> <b class="method">docked</b></a></li>
+<li><a href="#8"><i class="arg">pathName</i> <b class="method">orientation</b></a></li>
+</ul>
+</div>
+</div>
+<div id="section1" class="section"><h2><a name="section1">Description</a></h2>
+<p>Tktray is an extension that is able to create system tray icons.
+It follows <a href="http://www.freedesktop.org">http://www.freedesktop.org</a>
+specifications when looking up the system tray 
+manager. This protocol is supported by modern versions
+of KDE and Gnome panels, and by some other panel-like application.</p>
+</div>
+<div id="section2" class="section"><h2><a name="section2">COMMANDS</a></h2>
+<dl class="definitions">
+<dt><a name="1"><b class="cmd">tktray::icon</b> <i class="arg">pathName</i> <span class="opt">?<i class="arg">options</i>?</span></a></dt>
+<dd><p>Create a new icon for the system tray. 
+The application managing the system tray is notified about the new icon.
+It normally results in the icon being added to the tray.
+If there is no system tray at the icon creation time, the icon will be
+invisible. When a new system tray appears, the icon will be added to
+it. Since tktray 1.3, if the tray crashes and destroys your icon, it
+will be recreated on a new system tray when it's available.</p>
+<dl class="options">
+<dt><b class="option">-class</b></dt>
+<dd><p>WM_CLASS attribute for icon window. Tray manager may use class name
+   to remember icon position or other attributes. This name may be used 
+   for event binding as well.
+   For now, real icon window is distinct from the user-specified
+   widget: it may be recreated and destroyed several times during icon
+   lifetime, when a system tray crashes, terminates, disappears or
+   appears. However, tktray tries to forward click and motion events
+   from this inner window to user widget, so event bindings on widget name
+   should work as they used to.
+   This option applies to a real icon window, not to a user-visible widget,
+   so don't rely on it to set widget defaults from an option database:
+   the standard &quot;TrayIcon&quot; class name is used for it.</p></dd>
+<dt><b class="option">-docked</b></dt>
+<dd><p>boolean indicating whether the real icon window should be embedded into
+   a tray when it exists. Think of it as a heavier version of -visible option:
+   there is a guarantee that no place for icon will be reserved on any tray.</p></dd>
+<dt><b class="option">-image</b></dt>
+<dd><p>image to show in the system tray. Since tktray 1.3, image type &quot;photo&quot;
+   is not mandatory anymore.
+   Icon will be automatically redrawn on any image modifications. For
+   Tk, deleting an image and creating an image with the same name
+   later is a kind of image modification, and tktray follows this
+   convention.  Photo image operations that modify existing image
+   content are another example of events triggering redisplay.
+   Requested size for icon is set according to the image's width and height,
+   but obeying (or disobeying) this request is left for the tray.</p></dd>
+<dt><b class="option">-shape</b></dt>
+<dd><p>used to put a nonrectangular shape on an icon
+   window. Ignored for compatibility.</p></dd>
+<dt><b class="option">-visible</b></dt>
+<dd><p>boolean value indicating whether the icon must be visible. 
+   The system tray manager continues to manage the icon whether it is
+   visible or not. Thus  when invisible icon becomes visible, its position
+   on the system tray is likely to remain the same.
+   Tktray currently tries to find a tray and embed into it as soon as
+   possible, whether -visible is true or not. _XEMBED_INFO property is
+   set for embedded window: a tray should show or hide an icon
+   depending on this property. There may be, and indeed are,
+   incomplete tray implementations ignoring _XEMBED_INFO (ex. docker).
+   Gnome-panel &quot;unmaps&quot; an icon by making it one pixel wide, that
+   might to be what you expect.
+   For those implementations, the place for an icon will be reserved
+   but no image will be displayed: tktray takes care of it. Tktray
+   also blocks mouse event forwarding for invisible icons, so you may
+   be confident that no &lt;Button&gt; bindings will be invoked at this time.</p></dd>
+</dl></dd>
+<dt><a name="2"><i class="arg">pathName</i> <b class="method">balloon</b> <i class="arg">message</i> <span class="opt">?<i class="arg">msec_timeout</i>?</span></a></dt>
+<dd><p>Post a message that any decent tray implementation would show
+   alongside the icon (or a place allocated for it). The message will
+   disappear automatically after $msec_timeout
+   milliseconds. Unfortunately, there is absolutely no way to know if
+   the tray supports this feature, so don't rely on it for any
+   critical information to be delivered. When no timeout or zero
+   timeout is given, the message should not be hidden without user
+   action (usually a mouse click).
+   The return value is an integer, a message handle that may be used
+   for cancelling the message before timeout expiration, or zero if
+   there is currently no system tray to handle the request.</p></dd>
+<dt><a name="3"><i class="arg">pathName</i> <b class="method">cancel</b> <i class="arg">message_handle</i></a></dt>
+<dd><p>Cancel an earlier-posted balloon message. Zero message_handle is
+   silently ignored. If there is no message with this handle, or its
+   timeout has expired, or it was posted to another system tray and is
+   unknow to the current one, nothing bad should happen (but it
+   depends on the tray implementation).</p></dd>
+<dt><a name="4"><i class="arg">pathName</i> <b class="method">bbox</b></a></dt>
+<dd><p>Get the list of left, top, right and bottom coordinates of the icon
+   relative to the root window of the icon's screen.
+   This command should be used in preference to <b class="cmd">winfo rootx</b>
+   and <b class="cmd">winfo rooty</b> to get icon location, though the latter may
+   seem to work on your system.
+   Bounding box information is updated asynchronously. Don't rely on
+   its correctness on script startup, just after icon creation.  
+   This command is for event handlers:  on &lt;ButtonPress-3&gt;
+   you'd like to have a popup menu, but where it should be posted?
+   Use %W bbox to determine it right at the moment when a click happened.</p></dd>
+<dt><a name="5"><i class="arg">pathName</i> <b class="method">cget</b> <i class="arg">option</i></a></dt>
+<dd><p>Retrieve current option value as set by the caller.</p></dd>
+<dt><a name="6"><i class="arg">pathName</i> <b class="method">configure</b> <span class="opt">?<i class="arg">options</i>?</span></a></dt>
+<dd><p>Modify icon's options after it was created.</p></dd>
+<dt><a name="7"><i class="arg">pathName</i> <b class="method">docked</b></a></dt>
+<dd><p>Query icon if it's currently embedded into some system
+   tray. Invisible icons may be docked too (and tktray strives for
+   it). If this method returns false, the icon is not visible to
+   anyone, and no chance to get balloon messages displayed.</p></dd>
+<dt><a name="8"><i class="arg">pathName</i> <b class="method">orientation</b></a></dt>
+<dd><p>Query orientation of a system tray that is currently embedding the
+   icon.</p></dd>
+</dl>
+</div>
+<div id="section3" class="section"><h2><a name="section3">WINDOW MANAGEMENT</a></h2>
+<p>Current implementation of tktray is designed to present an
+   interface of a usual toplevel window, but there are some important
+   differences (some of them may come up later). System Tray
+   specification is based on XEMBED protocol, and the later has a
+   problem: when the embedder crashes, nothing can prevent embedded
+   windows from destruction.  Since tktray 1.3, no explicit icon
+   recreation code is required on Tcl level. The widget was split in
+   two: one represented by a caller-specified name, and another
+   (currently $path.inner) that exists only when a tray is available
+   (and dies and comes back and so on).
+   This solution has some disadvantages as well.  User-created widget
+   is not mapped at all, thus it can't be used any more as a parent
+   for other widgets, showing them instead of an image. A temporal
+   inner window, however, may contain widgets.</p>
+<p>This version introduces three virtual events: &lt;&lt;IconCreate&gt;&gt;
+   &lt;&lt;IconConfigure&gt;&gt; and &lt;&lt;IconDestroy&gt;&gt;. &lt;&lt;IconCreate&gt;&gt; is generated when
+   docking is requesting for an icon. &lt;&lt;IconConfigure&gt;&gt; is generated 
+   when an icon window is resized or changed in some other way. 
+   &lt;&lt;IconDestroy&gt;&gt; is generated when an icon is destroyed due to panel crash
+   or undocked with unsetting -docked option.</p>
+</div>
+<div id="section4" class="section"><h2><a name="section4">AUTHORS</a></h2>
+<p>Anton Kovalenko
+See <a href="http://www.sw4me.com/wiki/Tktray">http://www.sw4me.com/wiki/Tktray</a>.</p>
+</div>
+<div id="keywords" class="section"><h2><a name="keywords">Keywords</a></h2>
+<p>icons, system tray, taskbar</p>
+</div>
+<div id="copyright" class="section"><h2><a name="copyright">Copyright</a></h2>
+<p>Copyright &copy; 2005, Anton Kovalenko</p>
+</div>
+</div></body></html>

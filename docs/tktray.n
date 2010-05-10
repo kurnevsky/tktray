@@ -1,0 +1,418 @@
+'\"
+'\" Generated from file './docs/tktray.man' by tcllib/doctools with format 'nroff'
+'\" Copyright (c) 2005, Anton Kovalenko
+'\"
+'\" The definitions below are for supplemental macros used in Tcl/Tk
+'\" manual entries.
+'\"
+'\" .AP type name in/out ?indent?
+'\"	Start paragraph describing an argument to a library procedure.
+'\"	type is type of argument (int, etc.), in/out is either "in", "out",
+'\"	or "in/out" to describe whether procedure reads or modifies arg,
+'\"	and indent is equivalent to second arg of .IP (shouldn't ever be
+'\"	needed;  use .AS below instead)
+'\"
+'\" .AS ?type? ?name?
+'\"	Give maximum sizes of arguments for setting tab stops.  Type and
+'\"	name are examples of largest possible arguments that will be passed
+'\"	to .AP later.  If args are omitted, default tab stops are used.
+'\"
+'\" .BS
+'\"	Start box enclosure.  From here until next .BE, everything will be
+'\"	enclosed in one large box.
+'\"
+'\" .BE
+'\"	End of box enclosure.
+'\"
+'\" .CS
+'\"	Begin code excerpt.
+'\"
+'\" .CE
+'\"	End code excerpt.
+'\"
+'\" .VS ?version? ?br?
+'\"	Begin vertical sidebar, for use in marking newly-changed parts
+'\"	of man pages.  The first argument is ignored and used for recording
+'\"	the version when the .VS was added, so that the sidebars can be
+'\"	found and removed when they reach a certain age.  If another argument
+'\"	is present, then a line break is forced before starting the sidebar.
+'\"
+'\" .VE
+'\"	End of vertical sidebar.
+'\"
+'\" .DS
+'\"	Begin an indented unfilled display.
+'\"
+'\" .DE
+'\"	End of indented unfilled display.
+'\"
+'\" .SO
+'\"	Start of list of standard options for a Tk widget.  The
+'\"	options follow on successive lines, in four columns separated
+'\"	by tabs.
+'\"
+'\" .SE
+'\"	End of list of standard options for a Tk widget.
+'\"
+'\" .OP cmdName dbName dbClass
+'\"	Start of description of a specific option.  cmdName gives the
+'\"	option's name as specified in the class command, dbName gives
+'\"	the option's name in the option database, and dbClass gives
+'\"	the option's class in the option database.
+'\"
+'\" .UL arg1 arg2
+'\"	Print arg1 underlined, then print arg2 normally.
+'\"
+'\" RCS: @(#) $Id: man.macros,v 1.1 2009/01/30 04:56:47 andreas_kupries Exp $
+'\"
+'\"	# Set up traps and other miscellaneous stuff for Tcl/Tk man pages.
+.if t .wh -1.3i ^B
+.nr ^l \n(.l
+.ad b
+'\"	# Start an argument description
+.de AP
+.ie !"\\$4"" .TP \\$4
+.el \{\
+.   ie !"\\$2"" .TP \\n()Cu
+.   el          .TP 15
+.\}
+.ta \\n()Au \\n()Bu
+.ie !"\\$3"" \{\
+\&\\$1	\\fI\\$2\\fP	(\\$3)
+.\".b
+.\}
+.el \{\
+.br
+.ie !"\\$2"" \{\
+\&\\$1	\\fI\\$2\\fP
+.\}
+.el \{\
+\&\\fI\\$1\\fP
+.\}
+.\}
+..
+'\"	# define tabbing values for .AP
+.de AS
+.nr )A 10n
+.if !"\\$1"" .nr )A \\w'\\$1'u+3n
+.nr )B \\n()Au+15n
+.\"
+.if !"\\$2"" .nr )B \\w'\\$2'u+\\n()Au+3n
+.nr )C \\n()Bu+\\w'(in/out)'u+2n
+..
+.AS Tcl_Interp Tcl_CreateInterp in/out
+'\"	# BS - start boxed text
+'\"	# ^y = starting y location
+'\"	# ^b = 1
+.de BS
+.br
+.mk ^y
+.nr ^b 1u
+.if n .nf
+.if n .ti 0
+.if n \l'\\n(.lu\(ul'
+.if n .fi
+..
+'\"	# BE - end boxed text (draw box now)
+.de BE
+.nf
+.ti 0
+.mk ^t
+.ie n \l'\\n(^lu\(ul'
+.el \{\
+.\"	Draw four-sided box normally, but don't draw top of
+.\"	box if the box started on an earlier page.
+.ie !\\n(^b-1 \{\
+\h'-1.5n'\L'|\\n(^yu-1v'\l'\\n(^lu+3n\(ul'\L'\\n(^tu+1v-\\n(^yu'\l'|0u-1.5n\(ul'
+.\}
+.el \}\
+\h'-1.5n'\L'|\\n(^yu-1v'\h'\\n(^lu+3n'\L'\\n(^tu+1v-\\n(^yu'\l'|0u-1.5n\(ul'
+.\}
+.\}
+.fi
+.br
+.nr ^b 0
+..
+'\"	# VS - start vertical sidebar
+'\"	# ^Y = starting y location
+'\"	# ^v = 1 (for troff;  for nroff this doesn't matter)
+.de VS
+.if !"\\$2"" .br
+.mk ^Y
+.ie n 'mc \s12\(br\s0
+.el .nr ^v 1u
+..
+'\"	# VE - end of vertical sidebar
+.de VE
+.ie n 'mc
+.el \{\
+.ev 2
+.nf
+.ti 0
+.mk ^t
+\h'|\\n(^lu+3n'\L'|\\n(^Yu-1v\(bv'\v'\\n(^tu+1v-\\n(^Yu'\h'-|\\n(^lu+3n'
+.sp -1
+.fi
+.ev
+.\}
+.nr ^v 0
+..
+'\"	# Special macro to handle page bottom:  finish off current
+'\"	# box/sidebar if in box/sidebar mode, then invoked standard
+'\"	# page bottom macro.
+.de ^B
+.ev 2
+'ti 0
+'nf
+.mk ^t
+.if \\n(^b \{\
+.\"	Draw three-sided box if this is the box's first page,
+.\"	draw two sides but no top otherwise.
+.ie !\\n(^b-1 \h'-1.5n'\L'|\\n(^yu-1v'\l'\\n(^lu+3n\(ul'\L'\\n(^tu+1v-\\n(^yu'\h'|0u'\c
+.el \h'-1.5n'\L'|\\n(^yu-1v'\h'\\n(^lu+3n'\L'\\n(^tu+1v-\\n(^yu'\h'|0u'\c
+.\}
+.if \\n(^v \{\
+.nr ^x \\n(^tu+1v-\\n(^Yu
+\kx\h'-\\nxu'\h'|\\n(^lu+3n'\ky\L'-\\n(^xu'\v'\\n(^xu'\h'|0u'\c
+.\}
+.bp
+'fi
+.ev
+.if \\n(^b \{\
+.mk ^y
+.nr ^b 2
+.\}
+.if \\n(^v \{\
+.mk ^Y
+.\}
+..
+'\"	# DS - begin display
+.de DS
+.RS
+.nf
+.sp
+..
+'\"	# DE - end display
+.de DE
+.fi
+.RE
+.sp
+..
+'\"	# SO - start of list of standard options
+.de SO
+.SH "STANDARD OPTIONS"
+.LP
+.nf
+.ta 4c 8c 12c
+.ft B
+..
+'\"	# SE - end of list of standard options
+.de SE
+.fi
+.ft R
+.LP
+See the \\fBoptions\\fR manual entry for details on the standard options.
+..
+'\"	# OP - start of full description for a single option
+.de OP
+.LP
+.nf
+.ta 4c
+Command-Line Name:	\\fB\\$1\\fR
+Database Name:	\\fB\\$2\\fR
+Database Class:	\\fB\\$3\\fR
+.fi
+.IP
+..
+'\"	# CS - begin code excerpt
+.de CS
+.RS
+.nf
+.ta .25i .5i .75i 1i
+..
+'\"	# CE - end code excerpt
+.de CE
+.fi
+.RE
+..
+.de UL
+\\$1\l'|0\(ul'\\$2
+..
+.TH "tktray" n 1.0 tktray "tktray"
+.BS
+.SH NAME
+tktray \- System Tray Icon Support for Tk on X11
+.SH SYNOPSIS
+package require \fBTcl  8.4\fR
+.sp
+package require \fBtktray  ?1.0?\fR
+.sp
+\fBtktray::icon\fR \fIpathName\fR ?\fIoptions\fR?
+.sp
+\fIpathName\fR \fBballoon\fR \fImessage\fR ?\fImsec_timeout\fR?
+.sp
+\fIpathName\fR \fBcancel\fR \fImessage_handle\fR
+.sp
+\fIpathName\fR \fBbbox\fR
+.sp
+\fIpathName\fR \fBcget\fR \fIoption\fR
+.sp
+\fIpathName\fR \fBconfigure\fR ?\fIoptions\fR?
+.sp
+\fIpathName\fR \fBdocked\fR
+.sp
+\fIpathName\fR \fBorientation\fR
+.sp
+.BE
+.SH DESCRIPTION
+.PP
+Tktray is an extension that is able to create system tray icons.
+It follows \fIhttp://www.freedesktop.org\fR
+specifications when looking up the system tray
+manager. This protocol is supported by modern versions
+of KDE and Gnome panels, and by some other panel-like application.
+.SH COMMANDS
+.TP
+\fBtktray::icon\fR \fIpathName\fR ?\fIoptions\fR?
+Create a new icon for the system tray.
+The application managing the system tray is notified about the new icon.
+It normally results in the icon being added to the tray.
+If there is no system tray at the icon creation time, the icon will be
+invisible. When a new system tray appears, the icon will be added to
+it. Since tktray 1.3, if the tray crashes and destroys your icon, it
+will be recreated on a new system tray when it's available.
+.RS
+.TP
+\fB-class\fR
+WM_CLASS attribute for icon window. Tray manager may use class name
+to remember icon position or other attributes. This name may be used
+for event binding as well.
+For now, real icon window is distinct from the user-specified
+widget: it may be recreated and destroyed several times during icon
+lifetime, when a system tray crashes, terminates, disappears or
+appears. However, tktray tries to forward click and motion events
+from this inner window to user widget, so event bindings on widget name
+should work as they used to.
+This option applies to a real icon window, not to a user-visible widget,
+so don't rely on it to set widget defaults from an option database:
+the standard "TrayIcon" class name is used for it.
+.TP
+\fB-docked\fR
+boolean indicating whether the real icon window should be embedded into
+a tray when it exists. Think of it as a heavier version of -visible option:
+there is a guarantee that no place for icon will be reserved on any tray.
+.TP
+\fB-image\fR
+image to show in the system tray. Since tktray 1.3, image type "photo"
+is not mandatory anymore.
+Icon will be automatically redrawn on any image modifications. For
+Tk, deleting an image and creating an image with the same name
+later is a kind of image modification, and tktray follows this
+convention.  Photo image operations that modify existing image
+content are another example of events triggering redisplay.
+Requested size for icon is set according to the image's width and height,
+but obeying (or disobeying) this request is left for the tray.
+.TP
+\fB-shape\fR
+used to put a nonrectangular shape on an icon
+window. Ignored for compatibility.
+.TP
+\fB-visible\fR
+boolean value indicating whether the icon must be visible.
+The system tray manager continues to manage the icon whether it is
+visible or not. Thus  when invisible icon becomes visible, its position
+on the system tray is likely to remain the same.
+Tktray currently tries to find a tray and embed into it as soon as
+possible, whether -visible is true or not. _XEMBED_INFO property is
+set for embedded window: a tray should show or hide an icon
+depending on this property. There may be, and indeed are,
+incomplete tray implementations ignoring _XEMBED_INFO (ex. docker).
+Gnome-panel "unmaps" an icon by making it one pixel wide, that
+might to be what you expect.
+For those implementations, the place for an icon will be reserved
+but no image will be displayed: tktray takes care of it. Tktray
+also blocks mouse event forwarding for invisible icons, so you may
+be confident that no <Button> bindings will be invoked at this time.
+.RE
+.TP
+\fIpathName\fR \fBballoon\fR \fImessage\fR ?\fImsec_timeout\fR?
+Post a message that any decent tray implementation would show
+alongside the icon (or a place allocated for it). The message will
+disappear automatically after $msec_timeout
+milliseconds. Unfortunately, there is absolutely no way to know if
+the tray supports this feature, so don't rely on it for any
+critical information to be delivered. When no timeout or zero
+timeout is given, the message should not be hidden without user
+action (usually a mouse click).
+The return value is an integer, a message handle that may be used
+for cancelling the message before timeout expiration, or zero if
+there is currently no system tray to handle the request.
+.TP
+\fIpathName\fR \fBcancel\fR \fImessage_handle\fR
+Cancel an earlier-posted balloon message. Zero message_handle is
+silently ignored. If there is no message with this handle, or its
+timeout has expired, or it was posted to another system tray and is
+unknow to the current one, nothing bad should happen (but it
+depends on the tray implementation).
+.TP
+\fIpathName\fR \fBbbox\fR
+Get the list of left, top, right and bottom coordinates of the icon
+relative to the root window of the icon's screen.
+This command should be used in preference to \fBwinfo rootx\fR
+and \fBwinfo rooty\fR to get icon location, though the latter may
+seem to work on your system.
+Bounding box information is updated asynchronously. Don't rely on
+its correctness on script startup, just after icon creation.
+This command is for event handlers:  on <ButtonPress-3>
+you'd like to have a popup menu, but where it should be posted?
+Use %W bbox to determine it right at the moment when a click happened.
+.TP
+\fIpathName\fR \fBcget\fR \fIoption\fR
+Retrieve current option value as set by the caller.
+.TP
+\fIpathName\fR \fBconfigure\fR ?\fIoptions\fR?
+Modify icon's options after it was created.
+.TP
+\fIpathName\fR \fBdocked\fR
+Query icon if it's currently embedded into some system
+tray. Invisible icons may be docked too (and tktray strives for
+it). If this method returns false, the icon is not visible to
+anyone, and no chance to get balloon messages displayed.
+.TP
+\fIpathName\fR \fBorientation\fR
+Query orientation of a system tray that is currently embedding the
+icon.
+.PP
+.SH "WINDOW MANAGEMENT"
+Current implementation of tktray is designed to present an
+interface of a usual toplevel window, but there are some important
+differences (some of them may come up later). System Tray
+specification is based on XEMBED protocol, and the later has a
+problem: when the embedder crashes, nothing can prevent embedded
+windows from destruction.  Since tktray 1.3, no explicit icon
+recreation code is required on Tcl level. The widget was split in
+two: one represented by a caller-specified name, and another
+(currently $path.inner) that exists only when a tray is available
+(and dies and comes back and so on).
+This solution has some disadvantages as well.  User-created widget
+is not mapped at all, thus it can't be used any more as a parent
+for other widgets, showing them instead of an image. A temporal
+inner window, however, may contain widgets.
+.PP
+This version introduces three virtual events: <<IconCreate>>
+<<IconConfigure>> and <<IconDestroy>>. <<IconCreate>> is generated when
+docking is requesting for an icon. <<IconConfigure>> is generated
+when an icon window is resized or changed in some other way.
+<<IconDestroy>> is generated when an icon is destroyed due to panel crash
+or undocked with unsetting -docked option.
+.SH AUTHORS
+Anton Kovalenko
+See \fIhttp://www.sw4me.com/wiki/Tktray\fR.
+.PP
+.SH KEYWORDS
+icons, system tray, taskbar
+.SH COPYRIGHT
+.nf
+Copyright (c) 2005, Anton Kovalenko
+
+.fi

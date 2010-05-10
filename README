@@ -1,0 +1,75 @@
+README: tktray
+	This is the tktray source distribution.
+	Current (official) location for tktray is
+		http://code.google.com/p/tktray
+
+Tktray is a binary extension for Tcl/Tk, and it requires Tcl/Tk
+development headers in build time. Supported versions of Tcl/Tk (taken
+as a whole) are 8.4.*, 8.5.*, 8.6.*.
+
+Tktray shared library built against any one of these versions will
+work on other versions from this set, both older and newer.
+
+
+BUILD-TIME REQUIREMENTS
+
+Tcl and Tk (both 8.4 or later) public headers and development
+libraries are absolutely needed to build tktray. If it's possible to
+build some other Tk 8.4+ extension on your system, tktray will
+probably build as well.
+
+For GNU/Linux distributions using RPM packages, look for tcl*devel*.rpm,
+tk*devel*rpm; for Debian-based distributions using deb packages,
+look for tcl8.*-dev*deb and tk8.*-dev*deb.
+
+Any decent development packages for Tcl and Tk should contain
+tclConfig.sh and tkConfig.sh respectively, located somewhere around
+/usr/lib: either in /usr/lib directly or in /usr/lib/tcl8.x,
+/usr/lib/tk8.x (the latter is the standard result of maintainers'
+effort to allow several minor versions of Tcl and Tk to coexist).
+
+=====================================================================
+For Debian system shipping with tcl/tk 8.4, the following commands
+will do:
+
+sudo aptitude install tk8.4-dev
+
+(then, in tktray directory)
+./configure --with-tcl=/usr/lib/tcl8.4 --with-tk=/usr/lib/tk8.4
+make 
+
+(to test a fresh build; it's not strictly a test, but a small demo)
+make test
+
+(to install locally - don't do it, use checkinstall at least)
+make install
+=====================================================================
+
+In a couple of places tktray uses functions provided only in tk
+PRIVATE headers, that may not be available (or may be incomplete) in
+some distributions.  There is no such problem in debian, but someone
+runned into it under Alt Linux.
+
+For these distributions, ./configure script of tktray has a special
+parameter, --with-mad-tk-packager. With this parameter, tktray is
+configured not to use private headers at the cost of some runtime
+overhead during icon creation and docking. Some pieces of code that
+will be used when it's turned on are just plain ugly.
+
+
+RUN-TIME REQUIREMENTS
+
+After the package is built and installed, it will be available for
+scripts using tk 8.4, 8.5 and 8.6.
+
+See manpage or html page (included in source archive) for usage
+instructions.
+
+Current version of tktray was tested and proved to work with the
+following system tray implementations:
+
+* lxpanel-0.5.5 from LXDE project;
+* gnome-panel 2.30 from Gnome project;
+* stalonetray 0.8.0;
+* trayer 1.0;
+* docker 1.4.
