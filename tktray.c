@@ -37,6 +37,12 @@
 #define ICON_FLAG_ARGB32 (1<<1)
 #define ICON_FLAG_DIRTY_EDGES (1<<2)
 
+
+#define TKU_NO_BAD_WINDOW_BEGIN(display) \
+    { Tk_ErrorHandler error__handler = \
+	Tk_CreateErrorHandler(display,BadWindow,-1,-1,(int(*)())NULL, NULL);
+#define TKU_NO_BAD_WINDOW_END Tk_DeleteErrorHandler(error__handler); }
+
 #if MAD_TK_PACKAGER
 static void TKU_WmWithdraw(Tk_Window winPtr, Tcl_Interp *interp)
 {
@@ -75,12 +81,13 @@ static Tk_Window TKU_GetWrapper(Tk_Window winPtr)
 #endif
 
 /* Subscribe for extra X11 events (needed for MANAGER selection) */
-int TKU_AddInput( Display* dpy, Window win, long add_to_mask)
+void TKU_AddInput( Display* dpy, Window win, long add_to_mask)
 {
     XWindowAttributes xswa;
-    XGetWindowAttributes(dpy,win,&xswa);
-    return
-	XSelectInput(dpy,win,xswa.your_event_mask|add_to_mask);
+    TKU_NO_BAD_WINDOW_BEGIN(dpy)
+	XGetWindowAttributes(dpy,win,&xswa);
+    XSelectInput(dpy,win,xswa.your_event_mask|add_to_mask);
+    TKU_NO_BAD_WINDOW_END
 }
 
 /* Get Tk Window wrapper (make it exist if ny) */
@@ -121,11 +128,6 @@ static void TKU_VirtualEvent(Tk_Window tkwin, Tk_Uid eventid)
 
     Tk_QueueWindowEvent(&event.general, TCL_QUEUE_TAIL);
 }
-
-#define TKU_NO_BAD_WINDOW_BEGIN(display) \
-    { Tk_ErrorHandler error__handler = \
-	Tk_CreateErrorHandler(display,BadWindow,-1,-1,(int(*)())NULL, NULL);
-#define TKU_NO_BAD_WINDOW_END Tk_DeleteErrorHandler(error__handler); }
 
 
 /* Data structure representing dock widget */
@@ -266,11 +268,11 @@ static int TrayIconObjectCmd(ClientData cd, Tcl_Interp *interp,
 	return
 	    TrayIconConfigureMethod(icon,interp,objc-2,objv+2,0);
     case XWC_CGET:
-	if (objc!=2) {
+	if (objc!=3) {
 	    Tcl_WrongNumArgs(interp,1,objv,"option");
 	    return TCL_ERROR;
 	}
-	optionValue = Tk_GetOptionValue(interp,(char*)icon,icon->options,objv[1],icon->tkwin);
+	optionValue = Tk_GetOptionValue(interp,(char*)icon,icon->options,objv[2],icon->tkwin);
 	if (optionValue) {
 	    Tcl_SetObjResult(interp,optionValue);
 	    return TCL_OK;
@@ -434,8 +436,7 @@ static void CheckArgbVisual(DockIcon *icon)
     int depth = 0;
     Colormap cmap = None;
 
-    printf("Find matching visual from manager 0x%08x\n",(int)icon->trayManager);
-
+    TKU_NO_BAD_WINDOW_BEGIN(Tk_Display(icon->tkwin))
     XGetWindowProperty(Tk_Display(icon->tkwin),
 		       icon->trayManager,
 		       icon->a_NET_SYSTEM_TRAY_VISUAL,
@@ -445,9 +446,7 @@ static void CheckArgbVisual(DockIcon *icon)
 		       /* type */ XA_VISUALID,
 		       &retType, &retFormat, &retNitems,
 		       &retBytesAfter, &retProp);
-    if (retProp)
-	printf("After call having vid 0x%x nitem %d fmt %d rtt %d (should %d)\n",
-	       (int)*(long*)retProp,(int)retNitems, (int)retFormat, (int)retType, (int)XA_VISUALID);
+    TKU_NO_BAD_WINDOW_END
     if (retType == XA_VISUALID &&
 	retNitems == 1 &&
 	retFormat == 32) {
@@ -456,7 +455,6 @@ static void CheckArgbVisual(DockIcon *icon)
 	XFree(retProp);
 	match = Tk_GetVisual(icon->interp, icon->tkwin,
 			     numeric, &depth, &cmap);
-	printf("Matching visual depth %d cmap 0x%08x\n",depth,(int)cmap);
     }
     if (match&& depth==32 &&
 	match->red_mask == 0xFF0000UL &&
@@ -713,7 +711,6 @@ static void DisplayIcon(ClientData cd)
 				      pib.offset[3])<<24) : 0));
 		    } 
 		}
-		printf("Argb photo redraw\n");
 		XPutImage(Tk_Display(icon->drawingWin),
 			  icon->offscreenPixmap,
 			  icon->offscreenGC,
@@ -1055,8 +1052,8 @@ static void TrayIconUpdate(DockIcon* icon, int mask)
 	    icon->docked) {
 	    CheckArgbVisual(icon);
 	    if (icon->drawingWin &&
-		XVisualIDFromVisual(Tk_Visual(icon->drawingWin)) !=
-		XVisualIDFromVisual(icon->bestVisual)) {
+		((icon->bestVisual && !(icon->flags & ICON_FLAG_ARGB32)) ||
+		 (!icon->bestVisual && (icon->flags & ICON_FLAG_ARGB32)))) {
 		icon->myManager = None;
 		icon->wrapper = None;
 		icon->requestedWidth = icon->requestedHeight = 0;
