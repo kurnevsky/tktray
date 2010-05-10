@@ -934,8 +934,7 @@ static int PostBalloon(DockIcon* icon, const char * utf8msg,
 	icon->msgid = 0;
 
     memset(&ev, 0, sizeof(ev));
-    ev.type = ClientMessage;
-
+    ev.xclient.type = ClientMessage;
     ev.xclient.window = icon->wrapper;
 
     ev.xclient.message_type =
@@ -958,8 +957,9 @@ static int PostBalloon(DockIcon* icon, const char * utf8msg,
 	ev.xclient.window = icon->wrapper;
 	ev.xclient.message_type = icon->a_NET_SYSTEM_TRAY_MESSAGE_DATA;
 	ev.xclient.format = 8;
+
 	memset(ev.xclient.data.b,0,20);
-	strncpy(ev.xclient.data.b,utf8msg,20);
+	strncpy(ev.xclient.data.b,utf8msg,length<20?length:20);
 	XSendEvent(dpy, icon->myManager, True, StructureNotifyMask|SubstructureNotifyMask, &ev);
 	XSync(dpy,False);
 	utf8msg+=20;
