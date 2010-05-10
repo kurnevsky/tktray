@@ -950,8 +950,6 @@ static int PostBalloon(DockIcon* icon, const char * utf8msg,
     XSync(dpy, False);
 
     /* Sending message elements */
-    ev.xclient.message_type = icon->a_NET_SYSTEM_TRAY_MESSAGE_DATA;
-    ev.xclient.format = 8;
     while (length>0) {
 	ev.type = ClientMessage;
 	ev.xclient.window = icon->wrapper;
