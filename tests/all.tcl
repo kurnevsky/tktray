@@ -8,7 +8,9 @@ if {[catch {
     catch { package require tkpng}
     catch { package require Img::png}
     image create photo ico1 -file [file join $scriptdir mixer.png]
-    image create photo ico2 -file [file join $scriptdir mixer-off.png]
+#    image create photo ico2 -file [file join $scriptdir mixer-off.png]
+    image create bitmap ico2 -file [file join $scriptdir leftptr.xbm] \
+	-maskfile [file join $scriptdir leftpmsk.xbm]
     image create photo ico3 -file [file join $scriptdir grad.png]
     image create photo ico4 -file [file join $scriptdir grad.png]
     set count 4
@@ -24,8 +26,8 @@ if {$count==4} {
 set rrc 0
 proc regrad {} {
     global rrc
-    after 300 regrad
-    ico4 copy ico3 -compositingrule [if {[set rrc [expr {($rrc+1)%10}]]} {lindex overlay} {lindex set}]
+    after 200 regrad
+    ico4 copy ico3 -from 0 0 24 12 -compositingrule [if {[set rrc [expr {($rrc+1)%10}]]} {lindex overlay} {lindex set}]
 }
 regrad
 }
@@ -38,7 +40,7 @@ if 1 {
 	incr idx
 	if {$idx > $count} { set idx 1 }
     }
-    bind .myi <Motion> {puts "Over %X,%Y; Bbox [.myi bbox]; InnerGeo [wm geometry .myi.inner]"}
+    bind .myi <Motion> {puts "Over %X,%Y; Bbox [.myi bbox]; InnerGeo [wm geometry .myi.myi]"}
     bind .myi <Destroy> {puts "Hasta la vista"}
     bind .myi <Enter> {puts Now-In}
     bind .myi <Leave> {puts Now-Out}
