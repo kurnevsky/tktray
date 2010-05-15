@@ -636,7 +636,7 @@ static void DisplayIcon(ClientData cd)
     outx = (icon->width >= w) ? (icon->width - w)/2 : 0;
     outy = (icon->height >= h) ? (icon->height - h)/2 : 0;
     outw = (icon->width >= w) ? w : icon->width;
-    outh = (icon->height >= h) ? h : icon->width;
+    outh = (icon->height >= h) ? h : icon->height;
 
     icon->flags&=(~ICON_FLAG_REDRAW_PENDING);
 
