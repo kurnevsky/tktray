@@ -9,8 +9,9 @@ if {[catch {
     catch { package require Img::png}
     image create photo ico1 -file [file join $scriptdir mixer.png]
 #    image create photo ico2 -file [file join $scriptdir mixer-off.png]
-    image create bitmap ico2 -file [file join $scriptdir leftptr.xbm] \
+    #image create bitmap ico2 -file [file join $scriptdir leftptr.xbm] \
 	-maskfile [file join $scriptdir leftpmsk.xbm]
+    image create photo ico2 -file [file join $scriptdir coccinella.png]
     image create photo ico3 -file [file join $scriptdir grad.png]
     image create photo ico4 -file [file join $scriptdir grad.png]
     set count 4
