@@ -1152,6 +1152,7 @@ static void TrayIconDeleteProc( ClientData cd )
 static int TrayIconCreateCmd(ClientData cd, Tcl_Interp *interp,
 			     int objc, Tcl_Obj * CONST objv[])
 {
+    Tk_Window mainWindow = cd;
     DockIcon *icon;
 
     icon = (DockIcon*)attemptckalloc(sizeof(DockIcon));
@@ -1170,7 +1171,7 @@ static int TrayIconCreateCmd(ClientData cd, Tcl_Interp *interp,
        because it's not really shown */
     icon->tkwin =
 	Tk_CreateWindowFromPath(interp,
-				Tk_MainWindow(interp),
+				mainWindow,
 				Tcl_GetString(objv[1]),"");
     if (icon->tkwin == NULL) {
 	goto handleErrors;
@@ -1231,6 +1232,7 @@ static int TrayIconCreateCmd(ClientData cd, Tcl_Interp *interp,
 	goto handleErrors;
     }
 
+    Tcl_SetObjResult(interp,objv[1]);
     return TCL_OK;
 
 handleErrors:
@@ -1258,8 +1260,8 @@ int Tktray_Init ( Tcl_Interp* interp )
 	return TCL_ERROR;
 
     Tcl_CreateObjCommand(interp, "::tktray::icon",
-			 TrayIconCreateCmd, NULL, NULL );
+			 TrayIconCreateCmd, Tk_MainWindow(interp), NULL );
 
-    Tcl_PkgProvide( interp, PACKAGE_NAME, PACKAGE_VERSION);
+    Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION);
     return TCL_OK;
 }
